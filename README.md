@@ -1,6 +1,6 @@
 # JornadaSaludable
 
-Sistema integral de control horario y prevención de riesgos laborales
+App de control horario y prevención de riesgos laborales
 
 [![Licencia](https://img.shields.io/badge/licencia-Apache%202.0-blue.svg)](LICENSE)
 [![Estado](https://img.shields.io/badge/estado-en%20desarrollo-yellow.svg)]()
