@@ -48,3 +48,23 @@ Desktop.ini
 # =============================================================================
 __pycache__/
 *.pyc
+
+# =============================================================================
+#  Android — local config + build outputs (regenerable)
+# =============================================================================
+android/local.properties
+android/.gradle/
+android/.idea/
+android/.kotlin/
+android/build/
+android/app/build/
+android/captures/
+android/.cxx/
+android/app/release/
+android/app/debug/
+*.iml
+*.apk
+*.aab
+*.ap_
+*.dex
+.externalNativeBuild/
