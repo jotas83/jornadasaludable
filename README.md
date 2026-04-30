@@ -69,7 +69,7 @@ Ver [LICENSE](LICENSE) para más detalles.
 ##  Estado actual
 
 **Versión:** 0.1.0-dev  
-**Última actualización:** Marzo 2026
+**Última actualización:** Abril 2026
 
 Este repositorio se encuentra en fase inicial de desarrollo como parte del Trabajo de Fin de Grado.
 
