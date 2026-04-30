@@ -1,0 +1,29 @@
+{
+    "name": "jornadasaludable/api",
+    "description": "API REST standalone de JornadaSaludable — PHP 8.1+ / PDO MySQL / JWT",
+    "type": "project",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "php": ">=8.1",
+        "ext-pdo": "*",
+        "ext-pdo_mysql": "*",
+        "ext-mbstring": "*",
+        "ext-json": "*",
+        "firebase/php-jwt": "^7.0",
+        "ramsey/uuid": "^4.7",
+        "tecnickcom/tcpdf": "^6.7"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "JornadaSaludable\\Api\\Controllers\\": "src/controllers/",
+            "JornadaSaludable\\Api\\": "src/"
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "optimize-autoloader": true
+    }
+}
