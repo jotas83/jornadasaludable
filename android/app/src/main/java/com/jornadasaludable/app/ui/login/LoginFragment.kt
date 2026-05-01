@@ -63,7 +63,7 @@ class LoginFragment : Fragment() {
             is LoginUiState.Success -> {
                 binding.tvError.isVisible = false
                 viewModel.reset()
-                findNavController().navigate(R.id.action_login_to_home)
+                findNavController().navigate(R.id.action_login_to_dashboard)
             }
             else -> {
                 binding.tvError.isVisible = false

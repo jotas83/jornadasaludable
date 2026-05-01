@@ -1,6 +1,23 @@
 package com.jornadasaludable.app.data.api
 
 import com.google.gson.JsonObject
+import com.jornadasaludable.app.data.api.dto.AlertaDto
+import com.jornadasaludable.app.data.api.dto.AlertasIndexResponse
+import com.jornadasaludable.app.data.api.dto.BurnoutResponse
+import com.jornadasaludable.app.data.api.dto.CategoriasResponse
+import com.jornadasaludable.app.data.api.dto.DerechoBuscarResponse
+import com.jornadasaludable.app.data.api.dto.DerechoDto
+import com.jornadasaludable.app.data.api.dto.DerechosContenidosResponse
+import com.jornadasaludable.app.data.api.dto.DocumentoCreateRequest
+import com.jornadasaludable.app.data.api.dto.DocumentoCreateResponse
+import com.jornadasaludable.app.data.api.dto.DocumentosIndexResponse
+import com.jornadasaludable.app.data.api.dto.EmpresaDto
+import com.jornadasaludable.app.data.api.dto.FichajeCreateRequest
+import com.jornadasaludable.app.data.api.dto.FichajeCreateResponse
+import com.jornadasaludable.app.data.api.dto.FichajesIndexResponse
+import com.jornadasaludable.app.data.api.dto.JornadasIndexResponse
+import com.jornadasaludable.app.data.api.dto.PerfilDto
+import com.jornadasaludable.app.data.api.dto.ResumenDto
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -57,10 +74,10 @@ interface ApiService {
     // -------------------------------------------------------------------------
 
     @GET("jornadas")
-    suspend fun jornadasIndex(@QueryMap params: Map<String, String> = emptyMap()): Response<JsonObject>
+    suspend fun jornadasIndex(@QueryMap params: Map<String, String> = emptyMap()): Response<ApiEnvelope<JornadasIndexResponse>>
 
     @GET("jornadas/resumen")
-    suspend fun jornadasResumen(): Response<JsonObject>
+    suspend fun jornadasResumen(): Response<ApiEnvelope<ResumenDto>>
 
     @GET("jornadas/{uuid}")
     suspend fun jornadasShow(@Path("uuid") uuid: String): Response<JsonObject>
@@ -70,10 +87,10 @@ interface ApiService {
     // -------------------------------------------------------------------------
 
     @GET("fichajes")
-    suspend fun fichajesIndex(@QueryMap params: Map<String, String> = emptyMap()): Response<JsonObject>
+    suspend fun fichajesIndex(@QueryMap params: Map<String, String> = emptyMap()): Response<ApiEnvelope<FichajesIndexResponse>>
 
     @POST("fichajes")
-    suspend fun fichajeCreate(@Body body: Map<String, @JvmSuppressWildcards Any?>): Response<JsonObject>
+    suspend fun fichajeCreate(@Body body: FichajeCreateRequest): Response<ApiEnvelope<FichajeCreateResponse>>
 
     @POST("fichajes/sync")
     suspend fun fichajesSync(@Body body: Map<String, @JvmSuppressWildcards Any?>): Response<JsonObject>
@@ -103,7 +120,7 @@ interface ApiService {
     // -------------------------------------------------------------------------
 
     @GET("alertas")
-    suspend fun alertasIndex(@QueryMap params: Map<String, String> = emptyMap()): Response<JsonObject>
+    suspend fun alertasIndex(@QueryMap params: Map<String, String> = emptyMap()): Response<ApiEnvelope<AlertasIndexResponse>>
 
     @GET("alertas/tipos")
     suspend fun alertasTipos(): Response<JsonObject>
@@ -112,7 +129,7 @@ interface ApiService {
     suspend fun alertasGenerar(): Response<JsonObject>
 
     @PATCH("alertas/{uuid}/leida")
-    suspend fun alertasMarcarLeida(@Path("uuid") uuid: String): Response<JsonObject>
+    suspend fun alertasMarcarLeida(@Path("uuid") uuid: String): Response<ApiEnvelope<AlertaDto>>
 
     // -------------------------------------------------------------------------
     //  Derechos (orden: rutas estáticas declaradas antes en backend; aquí solo
@@ -120,26 +137,26 @@ interface ApiService {
     // -------------------------------------------------------------------------
 
     @GET("derechos/categorias")
-    suspend fun derechosCategorias(): Response<JsonObject>
+    suspend fun derechosCategorias(): Response<ApiEnvelope<CategoriasResponse>>
 
     @GET("derechos/categorias/{codigo}/contenidos")
-    suspend fun derechosContenidos(@Path("codigo") codigo: String): Response<JsonObject>
+    suspend fun derechosContenidos(@Path("codigo") codigo: String): Response<ApiEnvelope<DerechosContenidosResponse>>
 
     @GET("derechos/buscar")
-    suspend fun derechosBuscar(@Query("q") query: String): Response<JsonObject>
+    suspend fun derechosBuscar(@Query("q") query: String): Response<ApiEnvelope<DerechoBuscarResponse>>
 
     @GET("derechos/{codigo}")
-    suspend fun derechosShow(@Path("codigo") codigo: String): Response<JsonObject>
+    suspend fun derechosShow(@Path("codigo") codigo: String): Response<ApiEnvelope<DerechoDto>>
 
     // -------------------------------------------------------------------------
     //  Documentos
     // -------------------------------------------------------------------------
 
     @GET("documentos")
-    suspend fun documentosIndex(@QueryMap params: Map<String, String> = emptyMap()): Response<JsonObject>
+    suspend fun documentosIndex(@QueryMap params: Map<String, String> = emptyMap()): Response<ApiEnvelope<DocumentosIndexResponse>>
 
     @POST("documentos/generar")
-    suspend fun documentosGenerar(@Body body: Map<String, @JvmSuppressWildcards Any?>): Response<JsonObject>
+    suspend fun documentosGenerar(@Body body: DocumentoCreateRequest): Response<ApiEnvelope<DocumentoCreateResponse>>
 
     /** Stream binario del PDF — usar Response<ResponseBody> para escribir a fichero. */
     @Streaming
@@ -151,18 +168,18 @@ interface ApiService {
     // -------------------------------------------------------------------------
 
     @GET("burnout")
-    suspend fun burnoutIndex(@QueryMap params: Map<String, String> = emptyMap()): Response<JsonObject>
+    suspend fun burnoutIndex(@QueryMap params: Map<String, String> = emptyMap()): Response<ApiEnvelope<BurnoutResponse>>
 
     // -------------------------------------------------------------------------
     //  Usuario (perfil propio + empresa actual)
     // -------------------------------------------------------------------------
 
     @GET("usuarios/perfil")
-    suspend fun usuariosPerfil(): Response<JsonObject>
+    suspend fun usuariosPerfil(): Response<ApiEnvelope<PerfilDto>>
 
     @PUT("usuarios/perfil")
-    suspend fun usuariosUpdatePerfil(@Body body: Map<String, @JvmSuppressWildcards Any?>): Response<JsonObject>
+    suspend fun usuariosUpdatePerfil(@Body body: Map<String, @JvmSuppressWildcards Any?>): Response<ApiEnvelope<PerfilDto>>
 
     @GET("usuarios/empresa")
-    suspend fun usuariosEmpresa(): Response<JsonObject>
+    suspend fun usuariosEmpresa(): Response<ApiEnvelope<EmpresaDto>>
 }

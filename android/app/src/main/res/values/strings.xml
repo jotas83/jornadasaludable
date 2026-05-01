@@ -8,6 +8,105 @@
     <string name="login_hint_password">Contraseña</string>
     <string name="login_button">Entrar</string>
 
-    <!-- Home -->
+    <!-- Common -->
+    <string name="retry">Reintentar</string>
+    <string name="close">Cerrar</string>
     <string name="logout_button">Cerrar sesión</string>
+
+    <!-- Bottom nav -->
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_fichaje">Fichaje</string>
+    <string name="nav_alertas">Alertas</string>
+    <string name="nav_estadisticas">Stats</string>
+    <string name="nav_derechos">Derechos</string>
+
+    <!-- Dashboard host -->
+    <string name="tab_dashboard">Dashboard</string>
+    <string name="tab_perfil">Perfil</string>
+
+    <!-- Dashboard tab -->
+    <string name="dashboard_card_jornada_titulo">Jornada de hoy</string>
+    <string name="dashboard_card_semana_titulo">Esta semana</string>
+    <string name="dashboard_card_alerta_titulo">Alerta sin leer</string>
+    <string name="dashboard_separator_de">  de  </string>
+    <string name="dashboard_dias_trabajados">%1$d días trabajados esta semana</string>
+    <string name="dashboard_sin_fichaje">Sin fichaje</string>
+    <string name="dashboard_jornada_abierta">Jornada en curso</string>
+    <string name="dashboard_jornada_incompleta">Jornada incompleta</string>
+    <string name="dashboard_jornada_cerrada">Jornada cerrada</string>
+    <string name="dashboard_jornada_validada">Jornada validada</string>
+
+    <!-- Perfil tab -->
+    <string name="perfil_label_nif">NIF</string>
+    <string name="perfil_label_empresa">Empresa</string>
+    <string name="perfil_label_sector">Sector</string>
+    <string name="perfil_sin_contrato">— sin contrato vigente —</string>
+
+    <!-- Fichaje host -->
+    <string name="tab_fichar">Fichar</string>
+    <string name="tab_calendario">Calendario</string>
+
+    <!-- Fichar tab -->
+    <string name="fichar_gps_titulo">Ubicación</string>
+    <string name="fichar_gps_sin_permiso">Permiso de ubicación no concedido</string>
+    <string name="fichar_gps_apagado">GPS y red desactivados</string>
+    <string name="fichar_gps_sin_fix">Buscando posición…</string>
+    <string name="fichar_gps_ok">GPS activo · %1$s</string>
+    <string name="fichar_pedir_permiso">Conceder permiso</string>
+    <string name="fichar_estado_idle">Sin fichaje activo</string>
+    <string name="fichar_estado_trabajando">Jornada en curso</string>
+    <string name="fichar_entrada">ENTRADA</string>
+    <string name="fichar_salida">SALIDA</string>
+    <string name="fichar_pausa">Iniciar pausa</string>
+    <string name="fichar_pausa_pendiente">Pausas: pendiente de implementar UI completa.</string>
+    <string name="fichar_historial_titulo">Hoy</string>
+    <string name="fichar_historial_vacio">Aún no has fichado hoy.</string>
+
+    <!-- Calendario tab -->
+    <string name="cal_anterior">‹</string>
+    <string name="cal_siguiente">›</string>
+    <string name="cal_lun">Lun</string>
+    <string name="cal_mar">Mar</string>
+    <string name="cal_mie">Mié</string>
+    <string name="cal_jue">Jue</string>
+    <string name="cal_vie">Vie</string>
+    <string name="cal_sab">Sáb</string>
+    <string name="cal_dom">Dom</string>
+    <string name="cal_legend_validada">Validada</string>
+    <string name="cal_legend_cerrada">Cerrada</string>
+    <string name="cal_legend_incompleta">Incompleta</string>
+    <string name="cal_legend_abierta">Abierta</string>
+    <string name="cal_dia_sin_jornada">Sin jornada registrada este día.</string>
+
+    <!-- Alertas -->
+    <string name="alertas_burnout_titulo">Riesgo de burnout</string>
+    <string name="alertas_burnout_horas">Horas/día</string>
+    <string name="alertas_burnout_excesivas">Jornadas\nexcesivas</string>
+    <string name="alertas_burnout_dias_sin">Días sin\ndescanso</string>
+    <string name="alertas_burnout_puntuacion">Puntuación</string>
+    <string name="alertas_burnout_sin_datos">Sin datos suficientes</string>
+    <string name="alertas_tab_hoy">Hoy</string>
+    <string name="alertas_tab_semana">Semana</string>
+    <string name="alertas_tab_mes">Mes</string>
+    <string name="alertas_marcar_leida">Marcar leída</string>
+    <string name="alertas_leida">Leída</string>
+    <string name="alertas_vacio">Sin alertas en este período.</string>
+
+    <!-- Estadísticas -->
+    <string name="stats_tab_resumen">Resumen</string>
+    <string name="stats_tab_informes">Informes</string>
+    <string name="informes_card_titulo">Generar informe mensual</string>
+    <string name="informes_mes_label">Mes:</string>
+    <string name="informes_seleccionar">Cambiar</string>
+    <string name="informes_generar">Generar PDF</string>
+    <string name="informes_lista_titulo">Documentos generados</string>
+    <string name="informes_lista_vacia">Aún no has generado ningún informe.</string>
+
+    <!-- Mis Derechos -->
+    <string name="derechos_buscar_hint">Buscar (mín. 3 caracteres)</string>
+    <string name="derechos_categorias_titulo">Categorías</string>
+    <string name="derechos_mas_consultados">Más consultados</string>
+    <string name="derechos_buscando">Buscando…</string>
+    <string name="derechos_resultados">%1$d resultados para «%2$s»</string>
+    <string name="derechos_sin_resultados">Sin resultados.</string>
 </resources>
