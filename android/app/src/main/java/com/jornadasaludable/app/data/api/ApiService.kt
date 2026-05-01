@@ -2,6 +2,7 @@ package com.jornadasaludable.app.data.api
 
 import com.google.gson.JsonObject
 import com.jornadasaludable.app.data.api.dto.AlertaDto
+import com.jornadasaludable.app.data.api.dto.AlertasGenerarResponse
 import com.jornadasaludable.app.data.api.dto.AlertasIndexResponse
 import com.jornadasaludable.app.data.api.dto.BurnoutResponse
 import com.jornadasaludable.app.data.api.dto.CategoriasResponse
@@ -126,7 +127,7 @@ interface ApiService {
     suspend fun alertasTipos(): Response<JsonObject>
 
     @POST("alertas/generar")
-    suspend fun alertasGenerar(): Response<JsonObject>
+    suspend fun alertasGenerar(): Response<ApiEnvelope<AlertasGenerarResponse>>
 
     @PATCH("alertas/{uuid}/leida")
     suspend fun alertasMarcarLeida(@Path("uuid") uuid: String): Response<ApiEnvelope<AlertaDto>>

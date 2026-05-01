@@ -169,6 +169,22 @@
                 android:layout_marginTop="8dp"
                 android:visibility="gone" />
 
+            <!-- Badge de fichajes encolados offline -->
+            <TextView
+                android:id="@+id/tvOfflineBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="12dp"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="6dp"
+                android:background="@color/alerta_aviso"
+                android:textColor="@android:color/white"
+                android:textAppearance="?attr/textAppearanceLabelMedium"
+                android:visibility="gone"
+                tools:visibility="visible"
+                tools:text="2 fichajes pendientes de sincronizar" />
+
             <!-- Historial del día -->
             <TextView
                 android:layout_width="wrap_content"

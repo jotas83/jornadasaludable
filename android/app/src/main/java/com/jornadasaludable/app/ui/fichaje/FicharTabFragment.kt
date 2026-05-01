@@ -148,6 +148,15 @@ class FicharTabFragment : Fragment() {
 
         binding.submittingProgress.isVisible = s.submitting
 
+        // Badge de pendientes offline
+        binding.tvOfflineBadge.isVisible = s.pendingOffline > 0
+        if (s.pendingOffline > 0) {
+            binding.tvOfflineBadge.text = if (s.pendingOffline == 1)
+                getString(R.string.fichar_offline_badge_1)
+            else
+                getString(R.string.fichar_offline_badge_n, s.pendingOffline)
+        }
+
         // Historial de hoy
         renderHistorial(s.historial)
 

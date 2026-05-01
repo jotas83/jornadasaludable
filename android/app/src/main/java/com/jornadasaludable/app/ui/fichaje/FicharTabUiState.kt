@@ -17,7 +17,7 @@ data class GpsStatus(
     val hasPermission: Boolean,
     val gpsEnabled:    Boolean,
     val networkEnabled: Boolean,
-    val lastFix: String? = null,  // "40.4167, -3.7037" o null si no hay
+    val lastFix: String? = null,
 )
 
 sealed interface FicharTabUiState {
@@ -27,9 +27,10 @@ sealed interface FicharTabUiState {
         val jornadaEstado: JornadaEstado,
         val historial:     List<FichajeDto>,
         val gps:           GpsStatus,
-        /** Si está enviando un fichaje (botón disabled + spinner). */
         val submitting:    Boolean = false,
         /** Mensaje transitorio tras crear/error fichaje. Consume con consumeMessage(). */
         val transientMessage: String? = null,
+        /** Nº de fichajes encolados en Room esperando red. */
+        val pendingOffline: Int = 0,
     ) : FicharTabUiState
 }

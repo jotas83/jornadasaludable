@@ -3,6 +3,7 @@ package com.jornadasaludable.app.di
 import android.content.Context
 import androidx.room.Room
 import com.jornadasaludable.app.data.local.database.AppDatabase
+import com.jornadasaludable.app.data.local.database.FichajeDao
 import com.jornadasaludable.app.data.local.database.UserDao
 import dagger.Module
 import dagger.Provides
@@ -19,11 +20,12 @@ object DatabaseModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase =
         Room.databaseBuilder(context, AppDatabase::class.java, AppDatabase.NAME)
-            // En MVP: si cambia el schema, recreamos. Cuando estabilicemos
-            // entidades sustituir por migraciones explícitas.
             .fallbackToDestructiveMigration()
             .build()
 
     @Provides
     fun provideUserDao(db: AppDatabase): UserDao = db.userDao()
+
+    @Provides
+    fun provideFichajeDao(db: AppDatabase): FichajeDao = db.fichajeDao()
 }
