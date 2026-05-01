@@ -3,6 +3,7 @@ package com.jornadasaludable.app.data.repository
 import com.google.gson.Gson
 import com.jornadasaludable.app.data.api.ApiService
 import com.jornadasaludable.app.data.api.dto.AlertaDto
+import com.jornadasaludable.app.data.api.dto.AlertasGenerarResponse
 import com.jornadasaludable.app.data.api.safeApiCall
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -32,4 +33,12 @@ class AlertaRepository @Inject constructor(
     /** Marca una alerta como leída. Devuelve la versión actualizada. */
     suspend fun marcarLeida(uuid: String): Result<AlertaDto> =
         safeApiCall(gson) { api.alertasMarcarLeida(uuid) }
+
+    /**
+     * Dispara la regeneración de alertas en el backend (re-evalúa umbrales
+     * sobre las jornadas más recientes). Devuelve las que han pasado el
+     * dedup — son las que el cliente debe notificar al usuario.
+     */
+    suspend fun generar(): Result<AlertasGenerarResponse> =
+        safeApiCall(gson) { api.alertasGenerar() }
 }
