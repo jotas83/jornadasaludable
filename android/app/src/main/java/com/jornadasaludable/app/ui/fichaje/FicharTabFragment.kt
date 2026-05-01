@@ -2,6 +2,7 @@ package com.jornadasaludable.app.ui.fichaje
 
 import android.Manifest
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,9 +21,11 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.OffsetDateTime
 import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
@@ -38,6 +41,10 @@ class FicharTabFragment : Fragment() {
     private val timeFormatter   = DateTimeFormatter.ofPattern("HH:mm:ss")
     private val dateFormatter   = DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(Locale("es", "ES"))
     private val historiaFormatter = DateTimeFormatter.ofPattern("HH:mm")
+
+    /** Formato MySQL DATETIME(3) que devuelve el backend (UTC, sin offset). */
+    private val backendDateTimeMs   = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
+    private val backendDateTimeNoMs = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
     private val locationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -64,6 +71,7 @@ class FicharTabFragment : Fragment() {
         binding.btnEntrada.setOnClickListener { viewModel.ficharEntrada() }
         binding.btnSalida.setOnClickListener  { viewModel.ficharSalida() }
         binding.btnPausa.setOnClickListener   { viewModel.togglePausa() }
+        binding.btnSyncNow.setOnClickListener { viewModel.syncNow() }
         binding.btnRetry.setOnClickListener  { viewModel.refresh() }
         binding.btnRequestPermission.setOnClickListener { requestLocationPermission() }
 
@@ -122,6 +130,8 @@ class FicharTabFragment : Fragment() {
     }
 
     private fun renderReady(s: FicharTabUiState.Ready) {
+        Log.d("Fichar", "render: estado=${s.jornadaEstado} submitting=${s.submitting} " +
+            "pending=${s.pendingOffline} offline=${s.offlineMode} pausa=${s.activePausa?.uuid?.take(8)}")
         // GPS status
         val gps = s.gps
         binding.tvGpsStatus.text = when {
@@ -154,8 +164,8 @@ class FicharTabFragment : Fragment() {
 
         binding.submittingProgress.isVisible = s.submitting
 
-        // Badge de pendientes offline
-        binding.tvOfflineBadge.isVisible = s.pendingOffline > 0
+        // Badge + botón sync de pendientes offline (todo en offlineContainer)
+        binding.offlineContainer.isVisible = s.pendingOffline > 0
         if (s.pendingOffline > 0) {
             binding.tvOfflineBadge.text = if (s.pendingOffline == 1)
                 getString(R.string.fichar_offline_badge_1)
@@ -186,13 +196,35 @@ class FicharTabFragment : Fragment() {
             val item = inflater.inflate(R.layout.item_fichaje_historial, binding.historialList, false)
             val tvHora = item.findViewById<android.widget.TextView>(R.id.tvHora)
             val tvTipo = item.findViewById<android.widget.TextView>(R.id.tvTipo)
-            val hora = runCatching {
-                OffsetDateTime.parse(f.timestampEvento).format(historiaFormatter)
-            }.getOrDefault(f.timestampEvento.takeLast(8).take(5))
-            tvHora.text = hora
+            tvHora.text = formatBackendTimestamp(f.timestampEvento)
             tvTipo.text = f.tipo
             binding.historialList.addView(item)
         }
+    }
+
+    /**
+     * Convierte el timestamp del backend a HH:mm en la zona del dispositivo.
+     * Backend devuelve dos formatos:
+     *   - ISO con offset:        "2026-05-01T15:13:00+02:00"  (lo que envía el cliente)
+     *   - MySQL DATETIME(3) UTC: "2026-05-01 15:13:00.000"    (lo que persiste y relee)
+     * El segundo es el caso real al leer /fichajes. Asumimos UTC y convertimos
+     * a ZoneId.systemDefault() para mostrar la hora local.
+     */
+    private fun formatBackendTimestamp(ts: String): String {
+        runCatching {
+            return OffsetDateTime.parse(ts)
+                .atZoneSameInstant(ZoneId.systemDefault())
+                .format(historiaFormatter)
+        }
+        val ldt = runCatching { LocalDateTime.parse(ts, backendDateTimeMs) }.getOrNull()
+            ?: runCatching { LocalDateTime.parse(ts, backendDateTimeNoMs) }.getOrNull()
+        if (ldt != null) {
+            return ldt.atOffset(ZoneOffset.UTC)
+                .atZoneSameInstant(ZoneId.systemDefault())
+                .format(historiaFormatter)
+        }
+        Log.w("Fichar", "Timestamp no parseable: $ts")
+        return "--:--"
     }
 
     override fun onDestroyView() {

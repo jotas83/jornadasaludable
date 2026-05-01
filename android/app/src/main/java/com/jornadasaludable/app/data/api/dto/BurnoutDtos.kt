@@ -14,7 +14,8 @@ data class BurnoutResponse(
 )
 
 data class BurnoutEvaluacionDto(
-    @SerializedName("fecha_evaluacion")    val fechaEvaluacion: String,
+    /** Null cuando viene del bloque `burnout` de POST /alertas/generar (no incluye fecha). */
+    @SerializedName("fecha_evaluacion")    val fechaEvaluacion: String?,
     @SerializedName("horas_promedio_dia")  val horasPromedioDia: Double?,
     @SerializedName("dias_sin_descanso")   val diasSinDescanso: Int?,
     @SerializedName("jornadas_excesivas")  val jornadasExcesivas: Int?,

@@ -47,4 +47,7 @@ class TokenStore @Inject constructor(
 
     /** Lectura bloqueante para uso desde OkHttp Interceptor. NO llamar en main thread. */
     fun accessTokenBlocking(): String? = runBlocking { accessToken.first() }
+
+    /** Igual que `accessTokenBlocking` pero para el refresh — uso desde OkHttp Authenticator. */
+    fun refreshTokenBlocking(): String? = runBlocking { refreshToken.first() }
 }

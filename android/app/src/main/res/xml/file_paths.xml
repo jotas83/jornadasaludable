@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- PDFs descargados desde la API se sirven a apps externas (visor PDF)
+         vía FileProvider con autoridad ${applicationId}.fileprovider. -->
+    <cache-path name="pdf_cache" path="." />
+</paths>

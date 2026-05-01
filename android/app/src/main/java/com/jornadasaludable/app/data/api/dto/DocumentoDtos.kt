@@ -17,11 +17,15 @@ data class DocumentoDto(
     @SerializedName("nombre_fichero") val nombreFichero: String,
     @SerializedName("tamano_bytes")  val tamanoBytes: Long?,
     @SerializedName("hash_sha256")   val hashSha256: String?,
-    val firmado: Boolean,
-    val descargado: Boolean,
+    /** Backend devuelve TINYINT(1) sin cast a bool: 0/1 como número. */
+    val firmado: Int,
+    val descargado: Int,
     @SerializedName("descargado_at") val descargadoAt: String?,
     @SerializedName("created_at")    val createdAt: String,
-)
+) {
+    val esFirmado:    Boolean get() = firmado    != 0
+    val esDescargado: Boolean get() = descargado != 0
+}
 
 /**
  * POST /documentos/generar — para REGISTRO_JORNADA_MENSUAL el backend

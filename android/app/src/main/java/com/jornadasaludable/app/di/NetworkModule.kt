@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder
 import com.jornadasaludable.app.BuildConfig
 import com.jornadasaludable.app.data.api.ApiService
 import com.jornadasaludable.app.data.api.AuthInterceptor
+import com.jornadasaludable.app.data.api.TokenAuthenticator
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -42,11 +43,16 @@ object NetworkModule {
     fun provideOkHttpClient(
         authInterceptor: AuthInterceptor,
         loggingInterceptor: HttpLoggingInterceptor,
+        tokenAuthenticator: TokenAuthenticator,
     ): OkHttpClient = OkHttpClient.Builder()
         // Orden importa: auth primero (añade Bearer) y logging al final
         // (registra el header ya añadido).
         .addInterceptor(authInterceptor)
         .addInterceptor(loggingInterceptor)
+        // Authenticator se invoca cuando el servidor devuelve 401: refresca el
+        // access token vía /auth/refresh y reintenta la request original con
+        // el nuevo Bearer. Patrón OkHttp estándar.
+        .authenticator(tokenAuthenticator)
         .connectTimeout(15, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
         .writeTimeout(30, TimeUnit.SECONDS)
