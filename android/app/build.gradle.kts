@@ -59,6 +59,11 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.fragment.ktx)
+    implementation(libs.androidx.viewpager2)
+    implementation(libs.androidx.recyclerview)
+
+    // ---- Markwon (renderizado Markdown del contenido legal) ----
+    implementation(libs.markwon.core)
 
     // ---- Lifecycle: ViewModel + LiveData (MVVM) ----
     implementation(libs.androidx.lifecycle.viewmodel.ktx)

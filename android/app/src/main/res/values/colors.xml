@@ -3,4 +3,24 @@
     <color name="ic_launcher_background">#0F766E</color>
     <color name="md_theme_primary">#0F766E</color>
     <color name="md_theme_on_primary">#FFFFFF</color>
+
+    <!-- Calendario: estados de jornada -->
+    <color name="cal_validada">#4CAF50</color>
+    <color name="cal_cerrada">#2196F3</color>
+    <color name="cal_incompleta">#F44336</color>
+    <color name="cal_abierta">#FFC107</color>
+    <color name="cal_sin_jornada">#F0F0F0</color>
+
+    <!-- Niveles de alerta -->
+    <color name="alerta_critica">#B71C1C</color>      <!-- rojo oscuro -->
+    <color name="alerta_grave">#E53935</color>        <!-- rojo -->
+    <color name="alerta_aviso">#FB8C00</color>        <!-- naranja -->
+    <color name="alerta_informativa">#1976D2</color>  <!-- azul -->
+    <color name="alerta_fichaje_incompleto">#7B1FA2</color> <!-- morado -->
+
+    <!-- Niveles burnout -->
+    <color name="burnout_bajo">#4CAF50</color>
+    <color name="burnout_moderado">#FFC107</color>
+    <color name="burnout_alto">#FB8C00</color>
+    <color name="burnout_critico">#B71C1C</color>
 </resources>

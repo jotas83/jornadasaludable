@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ProgressBar
+        android:id="@+id/progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        tools:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/errorContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="32dp"
+        android:visibility="gone"
+        tools:visibility="gone">
+
+        <TextView
+            android:id="@+id/tvError"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceBodyLarge"
+            android:textColor="?attr/colorError" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnRetry"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/retry" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/contentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="12dp"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <!-- Header: navegación de mes -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAnterior"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/cal_anterior"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/tvMes"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textAppearance="?attr/textAppearanceTitleLarge"
+                tools:text="Abril 2026" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSiguiente"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/cal_siguiente"
+                android:textSize="20sp" />
+        </LinearLayout>
+
+        <!-- Cabecera días de la semana (Lun..Dom) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <TextView style="@style/CalDayHeader" android:text="@string/cal_lun" />
+            <TextView style="@style/CalDayHeader" android:text="@string/cal_mar" />
+            <TextView style="@style/CalDayHeader" android:text="@string/cal_mie" />
+            <TextView style="@style/CalDayHeader" android:text="@string/cal_jue" />
+            <TextView style="@style/CalDayHeader" android:text="@string/cal_vie" />
+            <TextView style="@style/CalDayHeader" android:text="@string/cal_sab" />
+            <TextView style="@style/CalDayHeader" android:text="@string/cal_dom" />
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvDias"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="2dp" />
+
+        <!-- Leyenda de colores -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <View android:layout_width="14dp" android:layout_height="14dp" android:background="@color/cal_validada"   android:layout_gravity="center_vertical"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginStart="4dp" android:layout_marginEnd="8dp"
+                android:textAppearance="?attr/textAppearanceLabelSmall"
+                android:text="@string/cal_legend_validada"/>
+            <View android:layout_width="14dp" android:layout_height="14dp" android:background="@color/cal_cerrada"    android:layout_gravity="center_vertical"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginStart="4dp" android:layout_marginEnd="8dp"
+                android:textAppearance="?attr/textAppearanceLabelSmall"
+                android:text="@string/cal_legend_cerrada"/>
+            <View android:layout_width="14dp" android:layout_height="14dp" android:background="@color/cal_incompleta" android:layout_gravity="center_vertical"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginStart="4dp" android:layout_marginEnd="8dp"
+                android:textAppearance="?attr/textAppearanceLabelSmall"
+                android:text="@string/cal_legend_incompleta"/>
+            <View android:layout_width="14dp" android:layout_height="14dp" android:background="@color/cal_abierta"    android:layout_gravity="center_vertical"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:textAppearance="?attr/textAppearanceLabelSmall"
+                android:text="@string/cal_legend_abierta"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+</FrameLayout>
