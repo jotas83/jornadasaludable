@@ -22,6 +22,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.time.LocalTime
 import java.time.OffsetDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
@@ -57,14 +58,12 @@ class FicharTabFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.tvDate.text = OffsetDateTime.now().format(dateFormatter)
+        binding.tvDate.text = OffsetDateTime.now(ZoneId.systemDefault()).format(dateFormatter)
             .replaceFirstChar { it.uppercase() }
 
         binding.btnEntrada.setOnClickListener { viewModel.ficharEntrada() }
         binding.btnSalida.setOnClickListener  { viewModel.ficharSalida() }
-        binding.btnPausa.setOnClickListener {
-            Snackbar.make(binding.root, R.string.fichar_pausa_pendiente, Snackbar.LENGTH_SHORT).show()
-        }
+        binding.btnPausa.setOnClickListener   { viewModel.togglePausa() }
         binding.btnRetry.setOnClickListener  { viewModel.refresh() }
         binding.btnRequestPermission.setOnClickListener { requestLocationPermission() }
 
@@ -135,15 +134,22 @@ class FicharTabFragment : Fragment() {
 
         // Botones según estado
         val canEntrada = s.jornadaEstado == JornadaEstado.IDLE && !s.submitting
-        val canSalida  = s.jornadaEstado == JornadaEstado.TRABAJANDO && !s.submitting
-        val canPausa   = s.jornadaEstado == JornadaEstado.TRABAJANDO && !s.submitting
+        val canSalida  = s.jornadaEstado != JornadaEstado.IDLE && !s.submitting
+        val canPausa   = s.jornadaEstado != JornadaEstado.IDLE && !s.submitting
         binding.btnEntrada.isEnabled = canEntrada
         binding.btnSalida.isEnabled  = canSalida
         binding.btnPausa.isEnabled   = canPausa
 
+        // Texto del botón pausa cambia según haya pausa abierta.
+        binding.btnPausa.setText(
+            if (s.jornadaEstado == JornadaEstado.EN_PAUSA) R.string.fichar_pausa_reanudar
+            else R.string.fichar_pausa_iniciar
+        )
+
         binding.tvEstadoLabel.text = when (s.jornadaEstado) {
             JornadaEstado.IDLE        -> getString(R.string.fichar_estado_idle)
             JornadaEstado.TRABAJANDO  -> getString(R.string.fichar_estado_trabajando)
+            JornadaEstado.EN_PAUSA    -> getString(R.string.fichar_estado_en_pausa)
         }
 
         binding.submittingProgress.isVisible = s.submitting

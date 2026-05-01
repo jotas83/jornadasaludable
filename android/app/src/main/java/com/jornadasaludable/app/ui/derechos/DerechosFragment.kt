@@ -50,10 +50,16 @@ class DerechosFragment : Fragment() {
         }
 
         categoriaAdapter = CategoriaAdapter { cat ->
-            // Al pulsar una categoría, abrimos un dialog con los items para
-            // mantener el scope reducido. Otra opción sería navegar a otra
-            // pantalla; lo dejamos como mejora futura.
-            viewModel.buscar(cat.nombre)  // shortcut: filtramos por nombre
+            // Navegar a la lista de derechos de esa categoría — llama al
+            // endpoint correcto GET /derechos/categorias/{codigo}/contenidos
+            // con el `codigo` (no el nombre, que rompía con búsquedas vacías).
+            findNavController().navigate(
+                R.id.action_derechos_to_categoria,
+                bundleOf(
+                    "codigoCategoria" to cat.codigo,
+                    "nombreCategoria" to cat.nombre,
+                ),
+            )
         }
         derechoAdapter = DerechoListAdapter { d -> openDetail(d.codigo) }
         searchAdapter  = DerechoListAdapter { d -> openDetail(d.codigo) }

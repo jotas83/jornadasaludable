@@ -55,9 +55,12 @@
     <string name="fichar_pedir_permiso">Conceder permiso</string>
     <string name="fichar_estado_idle">Sin fichaje activo</string>
     <string name="fichar_estado_trabajando">Jornada en curso</string>
+    <string name="fichar_estado_en_pausa">En pausa</string>
     <string name="fichar_entrada">ENTRADA</string>
     <string name="fichar_salida">SALIDA</string>
     <string name="fichar_pausa">Iniciar pausa</string>
+    <string name="fichar_pausa_iniciar">Iniciar pausa</string>
+    <string name="fichar_pausa_reanudar">Reanudar</string>
     <string name="fichar_pausa_pendiente">Pausas: pendiente de implementar UI completa.</string>
     <string name="fichar_historial_titulo">Hoy</string>
     <string name="fichar_historial_vacio">Aún no has fichado hoy.</string>
@@ -111,4 +114,5 @@
     <string name="derechos_buscando">Buscando…</string>
     <string name="derechos_resultados">%1$d resultados para «%2$s»</string>
     <string name="derechos_sin_resultados">Sin resultados.</string>
+    <string name="derechos_cat_vacia">No hay artículos en esta categoría.</string>
 </resources>
