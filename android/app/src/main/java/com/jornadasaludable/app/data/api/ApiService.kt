@@ -17,6 +17,9 @@ import com.jornadasaludable.app.data.api.dto.FichajeCreateRequest
 import com.jornadasaludable.app.data.api.dto.FichajeCreateResponse
 import com.jornadasaludable.app.data.api.dto.FichajesIndexResponse
 import com.jornadasaludable.app.data.api.dto.JornadasIndexResponse
+import com.jornadasaludable.app.data.api.dto.PausaCreateRequest
+import com.jornadasaludable.app.data.api.dto.PausaCreateResponse
+import com.jornadasaludable.app.data.api.dto.PausasIndexResponse
 import com.jornadasaludable.app.data.api.dto.PerfilDto
 import com.jornadasaludable.app.data.api.dto.ResumenDto
 import retrofit2.Response
@@ -101,10 +104,10 @@ interface ApiService {
     // -------------------------------------------------------------------------
 
     @GET("pausas")
-    suspend fun pausasIndex(@QueryMap params: Map<String, String> = emptyMap()): Response<JsonObject>
+    suspend fun pausasIndex(@QueryMap params: Map<String, String> = emptyMap()): Response<ApiEnvelope<PausasIndexResponse>>
 
     @POST("pausas")
-    suspend fun pausaCreate(@Body body: Map<String, @JvmSuppressWildcards Any?>): Response<JsonObject>
+    suspend fun pausaCreate(@Body body: PausaCreateRequest): Response<ApiEnvelope<PausaCreateResponse>>
 
     // -------------------------------------------------------------------------
     //  Horas extra

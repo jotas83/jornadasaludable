@@ -58,6 +58,26 @@
         <action
             android:id="@+id/action_derechos_to_detail"
             app:destination="@id/derechoDetailFragment" />
+        <action
+            android:id="@+id/action_derechos_to_categoria"
+            app:destination="@id/derechosCategoriaFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/derechosCategoriaFragment"
+        android:name="com.jornadasaludable.app.ui.derechos.DerechosCategoriaFragment"
+        android:label="Categoría"
+        tools:layout="@layout/fragment_derechos_categoria">
+        <argument
+            android:name="codigoCategoria"
+            app:argType="string" />
+        <argument
+            android:name="nombreCategoria"
+            app:argType="string"
+            android:defaultValue="" />
+        <action
+            android:id="@+id/action_derechosCategoria_to_detail"
+            app:destination="@id/derechoDetailFragment" />
     </fragment>
 
     <fragment
