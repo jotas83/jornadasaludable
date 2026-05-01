@@ -66,6 +66,7 @@
     <string name="fichar_historial_vacio">Aún no has fichado hoy.</string>
     <string name="fichar_offline_badge_1">1 fichaje pendiente de sincronizar</string>
     <string name="fichar_offline_badge_n">%1$d fichajes pendientes de sincronizar</string>
+    <string name="fichar_sync_now">Sincronizar ahora</string>
 
     <!-- Calendario tab -->
     <string name="cal_anterior">‹</string>

@@ -8,21 +8,18 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-    <!-- Geolocalización para fichajes con coordenadas (Art. 12 RD-Ley 8/2019,
-         registro horario). FINE para precisión sub-50m; COARSE como fallback. -->
+    <!-- Geolocalización para fichajes con coordenadas (Art. 12 RD-Ley 8/2019). -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
-    <!-- Foreground service para sincronización offline persistente y geofencing
-         opcional. Tipo `dataSync` cubre WorkManager con expedited/long-running. -->
+    <!-- Foreground service: WorkManager (dataSync) y geofencing opcional. -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
 
-    <!-- Notificaciones locales (Android 13+) — alertas legales y avisos. -->
+    <!-- Notificaciones locales (Android 13+). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-    <!-- Cliente HTTP en debug puede apuntar a 10.0.2.2 (cleartext en emulador). -->
     <application
         android:name=".JornadaSaludableApp"
         android:allowBackup="true"
@@ -46,5 +43,33 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Desactivar el initializer por defecto de WorkManager — usamos
+             Configuration.Provider en JornadaSaludableApp para que Hilt pueda
+             inyectar dependencias en los @HiltWorker (SyncWorker). Sin esto,
+             el worker no se instancia en runtime y el sync offline NO corre. -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
+
+        <!-- FileProvider para servir PDFs descargados (cacheDir) al visor
+             externo vía Intent ACTION_VIEW. Autoridad coincide con la usada
+             en InformesTabFragment.openPdf(). -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 </manifest>

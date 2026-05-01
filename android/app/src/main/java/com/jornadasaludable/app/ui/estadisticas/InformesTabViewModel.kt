@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.File
 import java.time.YearMonth
 import javax.inject.Inject
 
@@ -54,6 +55,32 @@ class InformesTabViewModel @Inject constructor(
                     _state.update { it.copy(generando = false, transientMessage = "Error: ${e.message ?: "no se pudo generar."}") }
                 }
         }
+    }
+
+    /**
+     * Descarga el PDF a `cacheDir/pdf_{uuid}.pdf` y emite `pendingOpenFile`
+     * para que el Fragment lance Intent ACTION_VIEW vía FileProvider.
+     */
+    fun openDocumento(uuid: String, cacheDir: File) {
+        if (_state.value.downloadingUuid != null) return
+        viewModelScope.launch {
+            _state.update { it.copy(downloadingUuid = uuid, transientMessage = null) }
+            val target = File(cacheDir, "pdf_$uuid.pdf")
+            documentoRepository.download(uuid, target)
+                .onSuccess { file ->
+                    _state.update { it.copy(downloadingUuid = null, pendingOpenFile = file) }
+                }
+                .onFailure { e ->
+                    _state.update { it.copy(
+                        downloadingUuid = null,
+                        transientMessage = "Error descargando: ${e.message ?: "."}",
+                    ) }
+                }
+        }
+    }
+
+    fun consumePendingOpenFile() {
+        _state.update { it.copy(pendingOpenFile = null) }
     }
 
     fun consumeMessage() {

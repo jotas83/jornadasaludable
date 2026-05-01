@@ -2,6 +2,7 @@ package com.jornadasaludable.app.ui.alertas
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jornadasaludable.app.data.api.dto.BurnoutEvaluacionDto
 import com.jornadasaludable.app.data.repository.AlertaRepository
 import com.jornadasaludable.app.data.repository.BurnoutRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,9 +18,6 @@ import javax.inject.Inject
  * ViewModel compartido por AlertasFragment y sus 3 sub-fragmentos
  * (Hoy/Semana/Mes). Los hijos lo obtienen vía:
  *   private val parentVM: AlertasViewModel by viewModels({ requireParentFragment() })
- *
- * Una sola fuente de verdad para alertas + burnout. Las pestañas filtran
- * client-side por período.
  */
 @HiltViewModel
 class AlertasViewModel @Inject constructor(
@@ -37,23 +35,43 @@ class AlertasViewModel @Inject constructor(
 
     init { load() }
 
+    /**
+     * Estrategia de carga del bloque burnout:
+     *   1. POST /alertas/generar fuerza al backend a recalcular y persistir
+     *      la evaluación. La respuesta incluye un campo `burnout` con los
+     *      valores recién calculados — más fiable que GET /burnout, que puede
+     *      devolver `actual=null` si la tabla histórica está vacía.
+     *   2. GET /burnout como fallback (último histórico persistido).
+     *   3. Display: lo más fresco de los dos. generar.burnout > actual > null.
+     *
+     * Si ambas calls fallan, mostramos error solo si TAMBIÉN la lista de
+     * alertas falla; si solo falla burnout, tab del burnout queda en Ready
+     * con null y la UI muestra "Sin datos suficientes".
+     */
     fun load() {
         viewModelScope.launch {
             _state.update { it.copy(burnout = Loadable.Loading, alertas = Loadable.Loading) }
-            val burnoutJob = async { burnoutRepository.load() }
+
+            // Paralelo: generar (fuerza recálculo) + listAll (lista alertas).
+            val generarJob = async { alertaRepository.generar() }
             val alertasJob = async { alertaRepository.listAll() }
 
-            val burnout = burnoutJob.await()
-                .map { it.actual }
-                .fold(
-                    onSuccess = { Loadable.Ready(it) },
-                    onFailure = { Loadable.Error(it.message ?: "Error cargando burnout.") },
-                )
+            // generar() devuelve burnout fresco si tiene éxito
+            val generarBurnout: BurnoutEvaluacionDto? = generarJob.await().getOrNull()?.burnout
+
+            // GET /burnout como fallback — solo si generar no nos dio nada
+            val historyBurnout: BurnoutEvaluacionDto? = if (generarBurnout == null) {
+                burnoutRepository.load().getOrNull()?.actual
+            } else null
+
+            val effective = generarBurnout ?: historyBurnout
+            val burnoutState: Loadable<BurnoutEvaluacionDto?> = Loadable.Ready(effective)
+
             val alertas = alertasJob.await().fold(
                 onSuccess = { Loadable.Ready(it) },
                 onFailure = { Loadable.Error(it.message ?: "Error cargando alertas.") },
             )
-            _state.update { it.copy(burnout = burnout, alertas = alertas) }
+            _state.update { it.copy(burnout = burnoutState, alertas = alertas) }
         }
     }
 

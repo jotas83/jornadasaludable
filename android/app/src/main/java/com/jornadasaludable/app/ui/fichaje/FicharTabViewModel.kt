@@ -1,5 +1,6 @@
 package com.jornadasaludable.app.ui.fichaje
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jornadasaludable.app.data.api.dto.FichajeCreateRequest
@@ -10,7 +11,9 @@ import com.jornadasaludable.app.data.repository.FichajeOutcome
 import com.jornadasaludable.app.data.repository.FichajeRepository
 import com.jornadasaludable.app.data.repository.OfflineFichajeRepository
 import com.jornadasaludable.app.data.repository.PausaRepository
+import com.jornadasaludable.app.data.sync.SyncScheduler
 import com.jornadasaludable.app.data.util.LocationProvider
+import com.jornadasaludable.app.data.util.NetworkMonitor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,11 +32,13 @@ import javax.inject.Inject
 @HiltViewModel
 class FicharTabViewModel @Inject constructor(
     private val fichajeRepository:        FichajeRepository,        // listado de hoy (lectura)
-    private val offlineFichajeRepository: OfflineFichajeRepository, // creación offline-first
+    private val offlineFichajeRepository: OfflineFichajeRepository, // creación offline-first + sync
     private val pausaRepository:          PausaRepository,
     private val alertaRepository:         AlertaRepository,
     private val notificationService:      AlertaNotificationService,
     private val locationProvider:         LocationProvider,
+    private val networkMonitor:           NetworkMonitor,
+    private val syncScheduler:            SyncScheduler,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<FicharTabUiState>(FicharTabUiState.Loading)
@@ -91,11 +96,21 @@ class FicharTabViewModel @Inject constructor(
                 else                                              -> JornadaEstado.IDLE
             }
 
+            val pendingCount = offlineFichajeRepository.pendingCountOnce()
+
+            // Si volvimos a tener red Y hay pendientes, dispara sync inmediato.
+            // No esperamos al periodic 15-min: el usuario espera ver los fichajes
+            // sincronizados en cuanto vuelve la conexión.
+            if (!isOffline && pendingCount > 0) {
+                Log.d(TAG, "online + $pendingCount pendientes → scheduleImmediateSync()")
+                syncScheduler.scheduleImmediateSync()
+            }
+
             _state.value = FicharTabUiState.Ready(
                 jornadaEstado  = estado,
                 historial      = cronologico,
                 gps            = readGpsStatus(),
-                pendingOffline = offlineFichajeRepository.pendingCountOnce(),
+                pendingOffline = pendingCount,
                 activePausa    = activePausa,
                 offlineMode    = isOffline,
             )
@@ -192,6 +207,7 @@ class FicharTabViewModel @Inject constructor(
                 precisionGpsM   = location?.accuracy?.toDouble(),
                 metodo          = "MANUAL",
             )
+            Log.d(TAG, "doFichaje: tipo=$tipo zone=${ZoneId.systemDefault()} ts=${req.timestampEvento}")
 
             offlineFichajeRepository.crearFichaje(req)
                 .onSuccess { outcome ->
@@ -256,6 +272,58 @@ class FicharTabViewModel @Inject constructor(
         return pausas.firstOrNull { p ->
             p.fin == null && p.inicio.startsWith(todayIsoDate)
         }?.let { ActivePausa(uuid = it.uuid, tipo = it.tipo) }
+    }
+
+    /**
+     * Disparada por el botón "Sincronizar ahora". Doble vía:
+     *
+     *   - Si NetworkMonitor reporta red disponible → ejecuta el sync DIRECTO
+     *     en una coroutine (vía OfflineFichajeRepository.syncPendingNow).
+     *     Esto evita la latencia del constraint NETWORK_CONNECTED del
+     *     OneTimeWorkRequest, que en emuladores con WiFi alternada tarda en
+     *     detectarse y a veces no se dispara.
+     *
+     *   - Si no hay red → cae a scheduleImmediateSync (queda parked hasta que
+     *     vuelva la conexión).
+     */
+    fun syncNow() {
+        val ready = _state.value as? FicharTabUiState.Ready ?: return
+        if (ready.submitting) return
+
+        viewModelScope.launch {
+            if (!networkMonitor.isOnline()) {
+                Log.d(TAG, "syncNow: sin red → scheduleImmediateSync (parked)")
+                syncScheduler.scheduleImmediateSync()
+                _state.update { (it as? FicharTabUiState.Ready)?.copy(
+                    transientMessage = "Sin red. Sincronización agendada para cuando haya conexión."
+                ) ?: it }
+                return@launch
+            }
+
+            Log.d(TAG, "syncNow: red OK → sync directo")
+            _state.update { (it as? FicharTabUiState.Ready)?.copy(
+                submitting = true, transientMessage = null,
+            ) ?: it }
+            offlineFichajeRepository.syncPendingNow()
+                .onSuccess { count ->
+                    val msg = if (count == 0) "Sin pendientes para sincronizar."
+                              else "$count fichajes sincronizados."
+                    _state.update { (it as? FicharTabUiState.Ready)?.copy(
+                        submitting = false, transientMessage = msg,
+                    ) ?: it }
+                    refresh()
+                }
+                .onFailure { e ->
+                    _state.update { (it as? FicharTabUiState.Ready)?.copy(
+                        submitting = false,
+                        transientMessage = "Error sincronizando: ${e.message ?: "."}",
+                    ) ?: it }
+                }
+        }
+    }
+
+    companion object {
+        private const val TAG = "Fichar"
     }
 
     private fun readGpsStatus(): GpsStatus {
