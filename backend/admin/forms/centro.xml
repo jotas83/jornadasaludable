@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form addfieldprefix="Joomla\Component\Jornadasaludable\Administrator\Field">
+    <fieldset name="datos">
+        <field name="id" type="hidden" default="0"/>
+
+        <field name="empresa_id" type="Empresa" required="true"
+               label="COM_JORNADASALUDABLE_CENTRO_FIELD_EMPRESA">
+            <option value="">- Selecciona empresa -</option>
+        </field>
+
+        <field name="codigo" type="text" required="true" size="20" maxlength="40"
+               label="COM_JORNADASALUDABLE_CENTRO_FIELD_CODIGO" filter="STRING"/>
+
+        <field name="nombre" type="text" required="true" size="40" maxlength="200"
+               label="COM_JORNADASALUDABLE_CENTRO_FIELD_NOMBRE" filter="STRING"/>
+
+        <field name="direccion" type="text" size="50" maxlength="255"
+               label="COM_JORNADASALUDABLE_CENTRO_FIELD_DIRECCION" filter="STRING"/>
+
+        <field name="latitud" type="number" step="0.0000001"
+               label="COM_JORNADASALUDABLE_CENTRO_FIELD_LATITUD" filter="float"/>
+
+        <field name="longitud" type="number" step="0.0000001"
+               label="COM_JORNADASALUDABLE_CENTRO_FIELD_LONGITUD" filter="float"/>
+
+        <field name="radio_geofence_m" type="number" default="150" min="10" max="5000"
+               label="COM_JORNADASALUDABLE_CENTRO_FIELD_RADIO" filter="integer"/>
+    </fieldset>
+</form>

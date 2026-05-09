@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form addfieldprefix="Joomla\Component\Jornadasaludable\Administrator\Field">
+    <fieldset name="datos" label="COM_JORNADASALUDABLE_TRABAJADOR_FIELDSET_DATOS">
+        <field name="id" type="hidden" default="0"/>
+
+        <field name="nif" type="text" required="true" size="20" maxlength="20"
+               label="COM_JORNADASALUDABLE_TRABAJADOR_FIELD_NIF" filter="STRING"/>
+
+        <field name="nombre" type="text" required="true" size="40" maxlength="120"
+               label="COM_JORNADASALUDABLE_TRABAJADOR_FIELD_NOMBRE" filter="STRING"/>
+
+        <field name="apellidos" type="text" required="true" size="40" maxlength="200"
+               label="COM_JORNADASALUDABLE_TRABAJADOR_FIELD_APELLIDOS" filter="STRING"/>
+
+        <field name="email" type="email" size="40" maxlength="190"
+               label="COM_JORNADASALUDABLE_TRABAJADOR_FIELD_EMAIL" filter="STRING"/>
+
+        <field name="telefono" type="text" size="20" maxlength="30"
+               label="COM_JORNADASALUDABLE_TRABAJADOR_FIELD_TELEFONO" filter="STRING"/>
+
+        <field name="idioma" type="list" default="es-ES"
+               label="COM_JORNADASALUDABLE_TRABAJADOR_FIELD_IDIOMA">
+            <option value="es-ES">Español</option>
+            <option value="ca-ES">Català</option>
+            <option value="eu-ES">Euskara</option>
+            <option value="gl-ES">Galego</option>
+            <option value="en-GB">English</option>
+        </field>
+
+        <field name="activo" type="radio" layout="joomla.form.field.radio.switcher" default="1"
+               label="COM_JORNADASALUDABLE_TRABAJADOR_FIELD_ACTIVO" filter="integer">
+            <option value="0">JNO</option>
+            <option value="1">JYES</option>
+        </field>
+    </fieldset>
+
+    <fieldset name="acceso" label="COM_JORNADASALUDABLE_TRABAJADOR_FIELDSET_ACCESO">
+        <field name="password" type="password" size="40" autocomplete="new-password"
+               label="COM_JORNADASALUDABLE_TRABAJADOR_FIELD_PASSWORD"
+               description="COM_JORNADASALUDABLE_TRABAJADOR_FIELD_PASSWORD_DESC"
+               filter="raw"/>
+    </fieldset>
+
+    <fields name="contrato">
+        <fieldset name="contrato" label="COM_JORNADASALUDABLE_CONTRATO_NUEVO"
+                  description="COM_JORNADASALUDABLE_TRABAJADOR_FIELDSET_CONTRATOS">
+
+            <field name="empresa_id" type="Empresa"
+                   label="COM_JORNADASALUDABLE_CONTRATO_FIELD_EMPRESA">
+                <option value="">- Selecciona empresa -</option>
+            </field>
+
+            <field name="tipo" type="list" default="INDEFINIDO"
+                   label="COM_JORNADASALUDABLE_CONTRATO_FIELD_TIPO">
+                <option value="INDEFINIDO">Indefinido</option>
+                <option value="TEMPORAL">Temporal</option>
+                <option value="FIJO_DISCONTINUO">Fijo discontinuo</option>
+                <option value="FORMACION">Formación</option>
+                <option value="PRACTICAS">Prácticas</option>
+            </field>
+
+            <field name="jornada_tipo" type="list" default="COMPLETA"
+                   label="COM_JORNADASALUDABLE_CONTRATO_FIELD_JORNADA_TIPO">
+                <option value="COMPLETA">Completa</option>
+                <option value="PARCIAL">Parcial</option>
+            </field>
+
+            <field name="horas_semanales" type="number" default="40" min="1" max="60" step="0.5"
+                   label="COM_JORNADASALUDABLE_CONTRATO_FIELD_HORAS_SEMANALES" filter="float"/>
+
+            <field name="fecha_inicio" type="calendar" format="%Y-%m-%d" todaybutton="true"
+                   label="COM_JORNADASALUDABLE_CONTRATO_FIELD_FECHA_INICIO" filter="user_utc"/>
+
+            <field name="fecha_fin" type="calendar" format="%Y-%m-%d"
+                   label="COM_JORNADASALUDABLE_CONTRATO_FIELD_FECHA_FIN" filter="user_utc"/>
+
+            <field name="vigente" type="radio" layout="joomla.form.field.radio.switcher" default="1"
+                   label="COM_JORNADASALUDABLE_CONTRATO_FIELD_VIGENTE" filter="integer">
+                <option value="0">JNO</option>
+                <option value="1">JYES</option>
+            </field>
+        </fieldset>
+    </fields>
+</form>

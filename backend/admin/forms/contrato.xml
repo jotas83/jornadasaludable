@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form addfieldprefix="Joomla\Component\Jornadasaludable\Administrator\Field">
+    <fieldset name="datos">
+        <field name="id" type="hidden" default="0"/>
+
+        <field name="user_id" type="Trabajador" required="true"
+               label="COM_JORNADASALUDABLE_TRABAJADOR">
+            <option value="">- Selecciona trabajador -</option>
+        </field>
+
+        <field name="empresa_id" type="Empresa" required="true"
+               label="COM_JORNADASALUDABLE_CONTRATO_FIELD_EMPRESA">
+            <option value="">- Selecciona empresa -</option>
+        </field>
+
+        <field name="tipo" type="list" default="INDEFINIDO" required="true"
+               label="COM_JORNADASALUDABLE_CONTRATO_FIELD_TIPO">
+            <option value="INDEFINIDO">Indefinido</option>
+            <option value="TEMPORAL">Temporal</option>
+            <option value="FIJO_DISCONTINUO">Fijo discontinuo</option>
+            <option value="FORMACION">Formación</option>
+            <option value="PRACTICAS">Prácticas</option>
+        </field>
+
+        <field name="jornada_tipo" type="list" default="COMPLETA" required="true"
+               label="COM_JORNADASALUDABLE_CONTRATO_FIELD_JORNADA_TIPO">
+            <option value="COMPLETA">Completa</option>
+            <option value="PARCIAL">Parcial</option>
+        </field>
+
+        <field name="horas_semanales" type="number" default="40" min="1" max="60" step="0.5" required="true"
+               label="COM_JORNADASALUDABLE_CONTRATO_FIELD_HORAS_SEMANALES" filter="float"/>
+
+        <field name="fecha_inicio" type="calendar" format="%Y-%m-%d" required="true" todaybutton="true"
+               label="COM_JORNADASALUDABLE_CONTRATO_FIELD_FECHA_INICIO" filter="user_utc"/>
+
+        <field name="fecha_fin" type="calendar" format="%Y-%m-%d"
+               label="COM_JORNADASALUDABLE_CONTRATO_FIELD_FECHA_FIN" filter="user_utc"/>
+
+        <field name="vigente" type="radio" layout="joomla.form.field.radio.switcher" default="1"
+               label="COM_JORNADASALUDABLE_CONTRATO_FIELD_VIGENTE" filter="integer">
+            <option value="0">JNO</option>
+            <option value="1">JYES</option>
+        </field>
+    </fieldset>
+</form>

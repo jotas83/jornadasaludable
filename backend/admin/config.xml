@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config>
+    <fieldset name="documentos" label="COM_JORNADASALUDABLE_CONFIG_DOCUMENTOS_FIELDSET">
+        <field name="storage_path" type="text" size="80" filter="raw"
+               default="C:/proyectos/jornadasaludable/backend/storage/documentos"
+               label="COM_JORNADASALUDABLE_CONFIG_STORAGE_PATH"
+               description="COM_JORNADASALUDABLE_CONFIG_STORAGE_PATH_DESC"/>
+    </fieldset>
+
+    <fieldset name="permissions" label="JCONFIG_PERMISSIONS_LABEL"
+              description="JCONFIG_PERMISSIONS_DESC">
+        <field name="rules" type="rules" component="com_jornadasaludable"
+               filter="rules" validate="rules" class="inputbox"
+               label="JCONFIG_PERMISSIONS_LABEL" section="component"/>
+    </fieldset>
+</config>

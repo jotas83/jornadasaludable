@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form addfieldprefix="Joomla\Component\Jornadasaludable\Administrator\Field">
+    <fields name="filter">
+        <field name="search" type="text" inputmode="search"
+               label="COM_JORNADASALUDABLE_ALERTA_FIELD_MENSAJE"
+               hint="JSEARCH_FILTER" filter="string"/>
+
+        <field name="empresa" type="Empresa" onchange="this.form.submit();"
+               label="COM_JORNADASALUDABLE_FILTER_EMPRESA">
+            <option value="">- Todos -</option>
+        </field>
+
+        <field name="trabajador" type="Trabajador" onchange="this.form.submit();"
+               label="COM_JORNADASALUDABLE_FILTER_TRABAJADOR">
+            <option value="">- Todos -</option>
+        </field>
+
+        <field name="tipo" type="AlertaTipo" onchange="this.form.submit();"
+               label="COM_JORNADASALUDABLE_FILTER_TIPO">
+            <option value="">- Todos -</option>
+        </field>
+
+        <field name="severidad" type="list" onchange="this.form.submit();"
+               label="COM_JORNADASALUDABLE_FILTER_SEVERIDAD" default="">
+            <option value="">- Todos -</option>
+            <option value="INFORMATIVA">Informativa</option>
+            <option value="AVISO">Aviso</option>
+            <option value="GRAVE">Grave</option>
+            <option value="CRITICA">Crítica</option>
+        </field>
+
+        <field name="leida" type="list" onchange="this.form.submit();"
+               label="COM_JORNADASALUDABLE_ALERTA_FILTER_LEIDA" default="">
+            <option value="">- Todos -</option>
+            <option value="1">COM_JORNADASALUDABLE_ALERTA_FILTER_LEIDA_SI</option>
+            <option value="0">COM_JORNADASALUDABLE_ALERTA_FILTER_LEIDA_NO</option>
+        </field>
+    </fields>
+    <fields name="list">
+        <field name="fullordering" type="list" default="a.fecha_evento DESC" onchange="this.form.submit();">
+            <option value="a.fecha_evento DESC">Más recientes</option>
+            <option value="a.fecha_evento ASC">Más antiguas</option>
+            <option value="t.severidad DESC">Severidad</option>
+        </field>
+        <field name="limit" type="limitbox" default="25" onchange="this.form.submit();" label="JGLOBAL_LIST_LIMIT"/>
+    </fields>
+</form>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form addfieldprefix="Joomla\Component\Jornadasaludable\Administrator\Field">
+    <fields name="filter">
+        <field name="search" type="text" inputmode="search"
+               label="COM_JORNADASALUDABLE_EMPRESA_FIELD_RAZON_SOCIAL"
+               hint="JSEARCH_FILTER" filter="string"/>
+
+        <field name="sector" type="Sector" onchange="this.form.submit();"
+               label="COM_JORNADASALUDABLE_EMPRESA_FIELD_SECTOR">
+            <option value="">COM_JORNADASALUDABLE_SELECT_SECTOR</option>
+        </field>
+
+        <field name="activo" type="list" onchange="this.form.submit();"
+               label="COM_JORNADASALUDABLE_FILTER_ACTIVO" default="">
+            <option value="">- Todos -</option>
+            <option value="1">COM_JORNADASALUDABLE_ESTADO_ACTIVO</option>
+            <option value="0">COM_JORNADASALUDABLE_ESTADO_INACTIVO</option>
+        </field>
+    </fields>
+    <fields name="list">
+        <field name="fullordering" type="list" default="a.razon_social ASC" onchange="this.form.submit();">
+            <option value="a.razon_social ASC">Razón social ascendente</option>
+            <option value="a.razon_social DESC">Razón social descendente</option>
+            <option value="a.cif ASC">CIF ascendente</option>
+            <option value="a.created_at DESC">Más recientes</option>
+        </field>
+        <field name="limit" type="limitbox" default="25" onchange="this.form.submit();" label="JGLOBAL_LIST_LIMIT"/>
+    </fields>
+</form>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form addfieldprefix="Joomla\Component\Jornadasaludable\Administrator\Field">
+    <fieldset name="datos" label="COM_JORNADASALUDABLE_EMPRESA_FIELDSET_DATOS">
+        <field name="id" type="hidden" default="0"/>
+
+        <field name="cif" type="text" required="true" size="20" maxlength="20"
+               label="COM_JORNADASALUDABLE_EMPRESA_FIELD_CIF" filter="STRING"/>
+
+        <field name="razon_social" type="text" required="true" size="50" maxlength="200"
+               label="COM_JORNADASALUDABLE_EMPRESA_FIELD_RAZON_SOCIAL" filter="STRING"/>
+
+        <field name="nombre_comercial" type="text" size="50" maxlength="200"
+               label="COM_JORNADASALUDABLE_EMPRESA_FIELD_NOMBRE_COMERCIAL" filter="STRING"/>
+
+        <field name="sector_id" type="Sector" required="true"
+               label="COM_JORNADASALUDABLE_EMPRESA_FIELD_SECTOR">
+            <option value="">COM_JORNADASALUDABLE_SELECT_SECTOR</option>
+        </field>
+
+        <field name="activo" type="radio" layout="joomla.form.field.radio.switcher" default="1"
+               label="COM_JORNADASALUDABLE_EMPRESA_FIELD_ACTIVO" filter="integer">
+            <option value="0">JNO</option>
+            <option value="1">JYES</option>
+        </field>
+    </fieldset>
+
+    <fieldset name="localizacion" label="COM_JORNADASALUDABLE_EMPRESA_FIELDSET_LOCALIZACION">
+        <field name="direccion" type="text" size="50" maxlength="255"
+               label="COM_JORNADASALUDABLE_EMPRESA_FIELD_DIRECCION" filter="STRING"/>
+        <field name="cp" type="text" size="10" maxlength="10"
+               label="COM_JORNADASALUDABLE_EMPRESA_FIELD_CP" filter="STRING"/>
+        <field name="municipio" type="text" size="30" maxlength="120"
+               label="COM_JORNADASALUDABLE_EMPRESA_FIELD_MUNICIPIO" filter="STRING"/>
+        <field name="provincia" type="text" size="30" maxlength="120"
+               label="COM_JORNADASALUDABLE_EMPRESA_FIELD_PROVINCIA" filter="STRING"/>
+    </fieldset>
+
+    <fieldset name="contacto" label="COM_JORNADASALUDABLE_EMPRESA_FIELDSET_CONTACTO">
+        <field name="email" type="email" size="40" maxlength="190"
+               label="COM_JORNADASALUDABLE_EMPRESA_FIELD_EMAIL" filter="STRING"/>
+        <field name="telefono" type="text" size="20" maxlength="30"
+               label="COM_JORNADASALUDABLE_EMPRESA_FIELD_TELEFONO" filter="STRING"/>
+    </fieldset>
+</form>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="component" method="upgrade">
+    <name>com_jornadasaludable</name>
+    <author>Jornada Saludable</author>
+    <creationDate>2026-05</creationDate>
+    <copyright>(C) 2026 Jornada Saludable</copyright>
+    <license>GPL v2 or later</license>
+    <version>1.0.0</version>
+    <description>COM_JORNADASALUDABLE_XML_DESCRIPTION</description>
+
+    <namespace path="src">Joomla\Component\Jornadasaludable</namespace>
+
+    <administration>
+        <menu img="icon-clock">COM_JORNADASALUDABLE</menu>
+        <submenu>
+            <menu link="option=com_jornadasaludable&amp;view=empresas" view="empresas" img="icon-briefcase" alt="JornadaSaludable/Empresas">COM_JORNADASALUDABLE_SUBMENU_EMPRESAS</menu>
+            <menu link="option=com_jornadasaludable&amp;view=trabajadores" view="trabajadores" img="icon-users" alt="JornadaSaludable/Trabajadores">COM_JORNADASALUDABLE_SUBMENU_TRABAJADORES</menu>
+            <menu link="option=com_jornadasaludable&amp;view=centros" view="centros" img="icon-location" alt="JornadaSaludable/Centros">COM_JORNADASALUDABLE_SUBMENU_CENTROS</menu>
+            <menu link="option=com_jornadasaludable&amp;view=alertas" view="alertas" img="icon-warning" alt="JornadaSaludable/Alertas">COM_JORNADASALUDABLE_SUBMENU_ALERTAS</menu>
+            <menu link="option=com_jornadasaludable&amp;view=documentos" view="documentos" img="icon-file" alt="JornadaSaludable/Documentos">COM_JORNADASALUDABLE_SUBMENU_DOCUMENTOS</menu>
+        </submenu>
+
+        <files folder="">
+            <folder>forms</folder>
+            <folder>language</folder>
+            <folder>services</folder>
+            <folder>src</folder>
+            <folder>tmpl</folder>
+            <filename>access.xml</filename>
+            <filename>config.xml</filename>
+        </files>
+
+        <languages folder="language">
+            <language tag="es-ES">es-ES/com_jornadasaludable.ini</language>
+            <language tag="es-ES">es-ES/com_jornadasaludable.sys.ini</language>
+        </languages>
+    </administration>
+</extension>
