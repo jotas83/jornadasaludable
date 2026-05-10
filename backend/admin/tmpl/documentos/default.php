@@ -22,6 +22,53 @@ $humanSize = static function (?int $bytes): string {
     return number_format($b, $i ? 1 : 0) . ' ' . $units[$i];
 };
 ?>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <h5 class="card-title">
+            <span class="icon-download" aria-hidden="true"></span>
+            <?php echo Text::_('COM_JORNADASALUDABLE_DOCUMENTO_EXPORT_TITLE'); ?>
+        </h5>
+        <form method="post"
+              action="<?php echo Route::_('index.php?option=com_jornadasaludable'); ?>"
+              class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label for="exp_user_id" class="form-label">
+                    <?php echo Text::_('COM_JORNADASALUDABLE_DOCUMENTO_EXPORT_TRABAJADOR'); ?>
+                </label>
+                <select id="exp_user_id" name="user_id" class="form-select" required>
+                    <option value="">- Selecciona trabajador -</option>
+                    <?php foreach ($this->trabajadores as $t) :
+                        $label = trim(($t->apellidos ?? '') . ', ' . ($t->nombre ?? '')) . ' (' . ($t->nif ?? '') . ')';
+                    ?>
+                        <option value="<?php echo (int) $t->id; ?>"><?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="exp_fecha_inicio" class="form-label">
+                    <?php echo Text::_('COM_JORNADASALUDABLE_DOCUMENTO_EXPORT_DESDE'); ?>
+                </label>
+                <input id="exp_fecha_inicio" type="date" name="fecha_inicio" class="form-control" required>
+            </div>
+            <div class="col-md-3">
+                <label for="exp_fecha_fin" class="form-label">
+                    <?php echo Text::_('COM_JORNADASALUDABLE_DOCUMENTO_EXPORT_HASTA'); ?>
+                </label>
+                <input id="exp_fecha_fin" type="date" name="fecha_fin" class="form-control" required>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-success w-100">
+                    <span class="icon-download" aria-hidden="true"></span>
+                    <?php echo Text::_('COM_JORNADASALUDABLE_DOCUMENTO_EXPORT_BTN'); ?>
+                </button>
+            </div>
+            <input type="hidden" name="task" value="documentos.exportarCsv">
+            <?php echo HTMLHelper::_('form.token'); ?>
+        </form>
+    </div>
+</div>
+
 <form action="<?php echo Route::_('index.php?option=com_jornadasaludable&view=documentos'); ?>"
       method="post" name="adminForm" id="adminForm">
     <div class="row">
