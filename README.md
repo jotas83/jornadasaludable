@@ -60,7 +60,7 @@ JornadaSaludable es un sistema diseñado para empoderar a los trabajadores en el
 
 Apache License 2.0
 
-Este proyecto es software libre. Puedes usar, modificar y distribuir este c贸digo bajo los t茅rminos de la licencia Apache 2.0.
+Este proyecto es software libre. Puedes usar, modificar y distribuir este código bajo los términos de la licencia Apache 2.0.
 
 Ver [LICENSE](LICENSE) para más detalles.
 
