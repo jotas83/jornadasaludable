@@ -80,7 +80,7 @@
     <string name="cal_dom">Dom</string>
     <string name="cal_legend_validada">Validada</string>
     <string name="cal_legend_cerrada">Cerrada</string>
-    <string name="cal_legend_incompleta">Incompleta</string>
+    <string name="cal_legend_corregida">Corregida</string>
     <string name="cal_legend_abierta">Abierta</string>
     <string name="cal_dia_sin_jornada">Sin jornada registrada este día.</string>
 

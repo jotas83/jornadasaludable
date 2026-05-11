@@ -115,14 +115,18 @@ final class JornadaController
 
     /**
      * Mapea estado del schema al vocabulario de la API:
-     *   - VALIDADA o CORREGIDA o validada_at NOT NULL → VALIDADA
+     *   - CORREGIDA → CORREGIDA (preservado para que la app lo distinga de VALIDADA)
+     *   - VALIDADA o validada_at NOT NULL → VALIDADA
      *   - CERRADA → CERRADA
      *   - ABIERTA + fecha < hoy → INCOMPLETA
      *   - ABIERTA + fecha >= hoy → ABIERTA
      */
     private function mapEstado(array $r): string
     {
-        if ($r['validada_at'] !== null || in_array($r['estado'], ['VALIDADA', 'CORREGIDA'], true)) {
+        if ($r['estado'] === 'CORREGIDA') {
+            return 'CORREGIDA';
+        }
+        if ($r['validada_at'] !== null || $r['estado'] === 'VALIDADA') {
             return 'VALIDADA';
         }
         if ($r['estado'] === 'CERRADA') {

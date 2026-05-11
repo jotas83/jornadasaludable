@@ -75,6 +75,7 @@ class CalendarioAdapter(
             "VALIDADA"   -> R.color.cal_validada
             "CERRADA"    -> R.color.cal_cerrada
             "INCOMPLETA" -> R.color.cal_incompleta
+            "CORREGIDA"  -> R.color.cal_incompleta
             "ABIERTA"    -> R.color.cal_abierta
             else         -> R.color.cal_sin_jornada
         }
