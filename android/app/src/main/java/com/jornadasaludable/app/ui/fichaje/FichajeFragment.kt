@@ -10,11 +10,7 @@ import com.jornadasaludable.app.R
 import com.jornadasaludable.app.databinding.FragmentFichajeBinding
 import dagger.hilt.android.AndroidEntryPoint
 
-/**
- * Pantalla de Fichaje. Hostea dos pestañas en un ViewPager2:
- *   0 → FicharTabFragment      (reloj + GPS + botones + historial hoy)
- *   1 → CalendarioTabFragment  (vista mensual del usuario)
- */
+// Dos tabs: Fichar y Calendario.
 @AndroidEntryPoint
 class FichajeFragment : Fragment() {
 

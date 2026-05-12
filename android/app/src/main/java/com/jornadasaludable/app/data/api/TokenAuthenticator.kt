@@ -13,34 +13,9 @@ import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
 
-/**
- * OkHttp Authenticator que resuelve 401 reactivamente. Patrón estándar:
- *
- *   1. Petición con access token → backend responde 401.
- *   2. authenticate() es invocado por OkHttp en thread de red.
- *   3. POST /auth/refresh con el refresh token guardado.
- *   4. Si éxito → guardamos los nuevos tokens y devolvemos la request original
- *      con el nuevo Bearer; OkHttp la reintenta automáticamente.
- *   5. Si fallo (refresh expirado, sin red, etc.) → null → el 401 original
- *      llega al caller que decidirá (típicamente: cerrar sesión).
- *
- * Detalles importantes:
- *
- *   - Usamos `Provider<ApiService>` para romper la dependencia circular
- *     OkHttpClient → Authenticator → ApiService → Retrofit → OkHttpClient.
- *     El Provider se resuelve perezosamente la primera vez que se invoca.
- *
- *   - Skipeamos los endpoints `/auth/login`, `/auth/refresh`, `/auth/logout`:
- *     un 401 ahí significa credenciales/token inválidos; reintentar refresh
- *     no arregla nada y crearía un bucle infinito.
- *
- *   - Mutex para evitar race con múltiples 401 simultáneos. El primero
- *     refresca; los siguientes ven el token actualizado y reintentan con él
- *     sin volver a refrescar.
- *
- *   - Guard de profundidad (responseCount) por si OkHttp decide reintentar
- *     más de una vez por petición original — en ese caso, abortamos.
- */
+// Resuelve 401 refrescando el access token con el refresh token.
+// Provider<ApiService> rompe el ciclo OkHttp → Authenticator → ApiService.
+// Mutex evita refrescos simultáneos cuando varios 401 caen a la vez.
 @Singleton
 class TokenAuthenticator @Inject constructor(
     private val tokenStore: TokenStore,
@@ -71,8 +46,7 @@ class TokenAuthenticator @Inject constructor(
             refreshMutex.withLock {
                 val currentToken = tokenStore.accessTokenBlocking()
 
-                // Si otro hilo ya refrescó mientras esperábamos el lock, basta con
-                // reintentar la request con el token nuevo.
+                // Otro hilo pudo refrescar mientras esperábamos el lock.
                 if (currentToken != null && currentToken != originalToken) {
                     Log.d(TAG, "token ya refrescado por otro hilo; reintentar")
                     return@withLock buildRequestWith(response.request, currentToken)

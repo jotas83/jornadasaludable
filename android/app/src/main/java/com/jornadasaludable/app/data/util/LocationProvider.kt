@@ -16,18 +16,7 @@ import kotlin.coroutines.resume
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeoutOrNull
 
-/**
- * Wrapper sobre `android.location.LocationManager` — sin dependencia de
- * Google Play Services. Útil para builds AOSP/sin-GMS y para reducir el
- * tamaño del APK.
- *
- * - `lastKnownLocation()` es no-bloqueante (cacheado). Puede devolver null
- *   si nunca se ha obtenido fix o si los permisos no están concedidos.
- * - `requestSingleUpdate()` pide UNA actualización fresca con timeout.
- *   Útil al pulsar ENTRADA/SALIDA para obtener la posición real.
- *
- * El llamador es responsable de pedir los permisos en runtime.
- */
+// Wrapper sobre LocationManager sin Google Play Services.
 @Singleton
 class LocationProvider @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -48,10 +37,6 @@ class LocationProvider @Inject constructor(
     fun isGpsEnabled():     Boolean = lm.isProviderEnabled(LocationManager.GPS_PROVIDER)
     fun isNetworkEnabled(): Boolean = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 
-    /**
-     * Última posición cacheada. Recorre los providers activos (GPS primero,
-     * luego network, luego passive) y devuelve la más reciente.
-     */
     fun lastKnownLocation(): Location? {
         if (!hasPermission()) return null
         val providers = listOf(
@@ -72,10 +57,6 @@ class LocationProvider @Inject constructor(
         return best
     }
 
-    /**
-     * Pide un único update fresco. Devuelve null si timeout o sin permiso.
-     * Usar antes de un fichaje para registrar coordenadas reales.
-     */
     suspend fun requestSingleUpdate(timeoutMs: Long = 5_000L): Location? {
         if (!hasPermission()) return null
         val provider = when {

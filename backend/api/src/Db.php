@@ -1,7 +1,4 @@
 <?php
-/**
- * @package JornadaSaludable\Api
- */
 declare(strict_types=1);
 
 namespace JornadaSaludable\Api;
@@ -10,16 +7,7 @@ use PDO;
 use PDOException;
 use RuntimeException;
 
-/**
- * Singleton PDO. Lazy: la conexión solo se abre la primera vez que se llama
- * a Db::pdo(). Lee credenciales de $GLOBALS['JS_CONFIG']['db'] (cargado por
- * public/index.php desde config.php).
- *
- * Uso:
- *   $stmt = Db::pdo()->prepare('SELECT * FROM ' . Db::table('users') . ' WHERE id = ?');
- *   $stmt->execute([$id]);
- *   $row = $stmt->fetch();
- */
+// Singleton PDO con conexión lazy.
 final class Db
 {
     private static ?PDO $instance = null;
@@ -49,7 +37,6 @@ final class Db
                 PDO::ATTR_STRINGIFY_FETCHES  => false,
             ]);
         } catch (PDOException $e) {
-            // No fugamos credenciales en modo no-debug.
             $debug = (bool) ($GLOBALS['JS_CONFIG']['debug'] ?? false);
             throw new RuntimeException(
                 $debug
@@ -63,21 +50,14 @@ final class Db
         return self::$instance;
     }
 
-    /**
-     * Devuelve el nombre completo de tabla con prefijo, entrecomillado con
-     * backticks. Equivalente al `#__tabla` de Joomla.
-     *
-     *   Db::table('users')   →   `js5_js_users`
-     */
+    // Nombre de tabla con prefijo y backticks (equivalente a `#__tabla` de Joomla).
     public static function table(string $name): string
     {
         $prefix = (string) ($GLOBALS['JS_CONFIG']['db']['prefix'] ?? '');
         return '`' . $prefix . $name . '`';
     }
 
-    /**
-     * Resetea el singleton. Solo para tests.
-     */
+    // Solo para tests.
     public static function reset(): void
     {
         self::$instance = null;

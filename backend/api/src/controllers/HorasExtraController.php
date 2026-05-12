@@ -81,7 +81,6 @@ final class HorasExtraController
 
         $uuid = $this->normalizeUuid($body['uuid'] ?? null);
 
-        // Idempotencia
         $stmt = Db::pdo()->prepare('SELECT * FROM ' . Db::table('horas_extra') . ' WHERE uuid = ? LIMIT 1');
         $stmt->execute([$uuid]);
         $existing = $stmt->fetch();
@@ -107,7 +106,6 @@ final class HorasExtraController
         $stmt->execute([$uuid]);
         $created = $stmt->fetch();
 
-        // Recargar jornada
         $stmt = Db::pdo()->prepare('SELECT uuid, fecha, minutos_trabajados, minutos_pausa, minutos_extra, estado FROM ' . Db::table('jornadas') . ' WHERE id = ?');
         $stmt->execute([(int) $jornada['id']]);
         $j = $stmt->fetch();

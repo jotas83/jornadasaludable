@@ -96,7 +96,6 @@ class DashboardTabFragment : Fragment() {
         }
     }
 
-    /** "75 min" → "1h 15min". */
     private fun formatMinutos(min: Int): String {
         if (min < 60) return "${min}min"
         val h = min / 60

@@ -12,25 +12,14 @@ import com.jornadasaludable.app.data.api.dto.JornadaListItemDto
 import java.time.LocalDate
 import java.time.YearMonth
 
-/**
- * RecyclerView adapter para una rejilla 7 columnas × N filas con los días
- * del mes. Las celdas previas al día 1 y posteriores al último se renderizan
- * vacías (espaciador del calendario).
- *
- * Color de fondo según `JornadaListItemDto.estado`:
- *   - VALIDADA  → verde
- *   - CERRADA   → azul
- *   - INCOMPLETA→ rojo
- *   - ABIERTA   → amarillo
- *   - sin jornada → gris muy claro
- */
+// Rejilla 7×N con los días del mes. El color de la celda viene del estado de la jornada.
 class CalendarioAdapter(
     private val onDiaClick: (LocalDate, JornadaListItemDto?) -> Unit,
 ) : RecyclerView.Adapter<CalendarioAdapter.DiaViewHolder>() {
 
     private var mes: YearMonth = YearMonth.now()
     private var jornadasPorFecha: Map<String, JornadaListItemDto> = emptyMap()
-    private var primeraCeldaOffset: Int = 0   // posición donde empieza día 1
+    private var primeraCeldaOffset: Int = 0
     private var diasMes: Int = 0
     private var totalCeldas: Int = 0
 
@@ -38,9 +27,8 @@ class CalendarioAdapter(
         this.mes = mes
         this.jornadasPorFecha = jornadasPorFecha
         this.diasMes = mes.lengthOfMonth()
-        // dayOfWeek.value: lunes=1 ... domingo=7. Offset = value - 1 (lunes=0).
+        // Lunes=0 ... domingo=6 para alinear la primera fila.
         this.primeraCeldaOffset = mes.atDay(1).dayOfWeek.value - 1
-        // Múltiplo de 7 que cubre todos los días.
         this.totalCeldas = (((primeraCeldaOffset + diasMes) + 6) / 7) * 7
         notifyDataSetChanged()
     }
@@ -58,7 +46,6 @@ class CalendarioAdapter(
         val dia = position - primeraCeldaOffset + 1
 
         if (dia < 1 || dia > diasMes) {
-            // Celda fuera del mes
             holder.tvDia.text = ""
             holder.tvDia.setBackgroundColor(Color.TRANSPARENT)
             holder.itemView.isClickable = false
@@ -80,7 +67,6 @@ class CalendarioAdapter(
             else         -> R.color.cal_sin_jornada
         }
         holder.tvDia.setBackgroundColor(ContextCompat.getColor(ctx, colorRes))
-        // Hoy → borde resaltado vía typeface bold
         holder.tvDia.setTypeface(null, if (fecha == LocalDate.now()) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL)
 
         holder.itemView.isClickable = true

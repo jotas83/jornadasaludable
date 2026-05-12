@@ -35,32 +35,14 @@ import retrofit2.http.QueryMap
 import retrofit2.http.Streaming
 import okhttp3.ResponseBody
 
-/**
- * Interfaz Retrofit con los 30 endpoints de la API.
- *
- * Convención: el access-token JWT lo añade un OkHttp interceptor — NO se
- * pasa por @Header en cada método para evitar fugas y reducir boilerplate.
- *
- * Los endpoints públicos (login, refresh, health) no requieren token; el
- * interceptor reconoce sus paths y omite el header Authorization.
- *
- * Tipos de respuesta: donde hay DTO definido (auth) se usa el tipo concreto.
- * Donde aún no hay (mayoría), se devuelve JsonObject para parsearse en el
- * repositorio cuando se implemente la pantalla.
- */
+// Endpoints Retrofit. El token JWT lo inyecta AuthInterceptor.
 interface ApiService {
 
-    // -------------------------------------------------------------------------
-    //  Health (público)
-    // -------------------------------------------------------------------------
-
+    // Health (público)
     @GET("health")
     suspend fun health(): Response<JsonObject>
 
-    // -------------------------------------------------------------------------
-    //  Auth
-    // -------------------------------------------------------------------------
-
+    // Auth
     @POST("auth/login")
     suspend fun login(@Body body: LoginRequest): Response<ApiEnvelope<AuthResponse>>
 
@@ -73,10 +55,7 @@ interface ApiService {
     @POST("auth/logout")
     suspend fun logout(): Response<Unit>
 
-    // -------------------------------------------------------------------------
-    //  Jornadas
-    // -------------------------------------------------------------------------
-
+    // Jornadas
     @GET("jornadas")
     suspend fun jornadasIndex(@QueryMap params: Map<String, String> = emptyMap()): Response<ApiEnvelope<JornadasIndexResponse>>
 
@@ -86,10 +65,7 @@ interface ApiService {
     @GET("jornadas/{uuid}")
     suspend fun jornadasShow(@Path("uuid") uuid: String): Response<JsonObject>
 
-    // -------------------------------------------------------------------------
-    //  Fichajes
-    // -------------------------------------------------------------------------
-
+    // Fichajes
     @GET("fichajes")
     suspend fun fichajesIndex(@QueryMap params: Map<String, String> = emptyMap()): Response<ApiEnvelope<FichajesIndexResponse>>
 
@@ -99,30 +75,21 @@ interface ApiService {
     @POST("fichajes/sync")
     suspend fun fichajesSync(@Body body: Map<String, @JvmSuppressWildcards Any?>): Response<JsonObject>
 
-    // -------------------------------------------------------------------------
-    //  Pausas
-    // -------------------------------------------------------------------------
-
+    // Pausas
     @GET("pausas")
     suspend fun pausasIndex(@QueryMap params: Map<String, String> = emptyMap()): Response<ApiEnvelope<PausasIndexResponse>>
 
     @POST("pausas")
     suspend fun pausaCreate(@Body body: PausaCreateRequest): Response<ApiEnvelope<PausaCreateResponse>>
 
-    // -------------------------------------------------------------------------
-    //  Horas extra
-    // -------------------------------------------------------------------------
-
+    // Horas extra
     @GET("horas-extra")
     suspend fun horasExtraIndex(@QueryMap params: Map<String, String> = emptyMap()): Response<JsonObject>
 
     @POST("horas-extra")
     suspend fun horasExtraCreate(@Body body: Map<String, @JvmSuppressWildcards Any?>): Response<JsonObject>
 
-    // -------------------------------------------------------------------------
-    //  Alertas
-    // -------------------------------------------------------------------------
-
+    // Alertas
     @GET("alertas")
     suspend fun alertasIndex(@QueryMap params: Map<String, String> = emptyMap()): Response<ApiEnvelope<AlertasIndexResponse>>
 
@@ -135,11 +102,7 @@ interface ApiService {
     @PATCH("alertas/{uuid}/leida")
     suspend fun alertasMarcarLeida(@Path("uuid") uuid: String): Response<ApiEnvelope<AlertaDto>>
 
-    // -------------------------------------------------------------------------
-    //  Derechos (orden: rutas estáticas declaradas antes en backend; aquí solo
-    //  importan las firmas).
-    // -------------------------------------------------------------------------
-
+    // Derechos
     @GET("derechos/categorias")
     suspend fun derechosCategorias(): Response<ApiEnvelope<CategoriasResponse>>
 
@@ -152,32 +115,23 @@ interface ApiService {
     @GET("derechos/{codigo}")
     suspend fun derechosShow(@Path("codigo") codigo: String): Response<ApiEnvelope<DerechoDto>>
 
-    // -------------------------------------------------------------------------
-    //  Documentos
-    // -------------------------------------------------------------------------
-
+    // Documentos
     @GET("documentos")
     suspend fun documentosIndex(@QueryMap params: Map<String, String> = emptyMap()): Response<ApiEnvelope<DocumentosIndexResponse>>
 
     @POST("documentos/generar")
     suspend fun documentosGenerar(@Body body: DocumentoCreateRequest): Response<ApiEnvelope<DocumentoCreateResponse>>
 
-    /** Stream binario del PDF — usar Response<ResponseBody> para escribir a fichero. */
+    // Descarga binaria del PDF.
     @Streaming
     @GET("documentos/{uuid}/descargar")
     suspend fun documentosDescargar(@Path("uuid") uuid: String): Response<ResponseBody>
 
-    // -------------------------------------------------------------------------
-    //  Burnout
-    // -------------------------------------------------------------------------
-
+    // Burnout
     @GET("burnout")
     suspend fun burnoutIndex(@QueryMap params: Map<String, String> = emptyMap()): Response<ApiEnvelope<BurnoutResponse>>
 
-    // -------------------------------------------------------------------------
-    //  Usuario (perfil propio + empresa actual)
-    // -------------------------------------------------------------------------
-
+    // Usuario
     @GET("usuarios/perfil")
     suspend fun usuariosPerfil(): Response<ApiEnvelope<PerfilDto>>
 

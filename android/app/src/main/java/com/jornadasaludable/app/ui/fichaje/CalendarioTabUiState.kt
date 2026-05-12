@@ -8,7 +8,6 @@ sealed interface CalendarioTabUiState {
     data class Error(val message: String) : CalendarioTabUiState
     data class Ready(
         val mes: YearMonth,
-        /** Mapa fecha (YYYY-MM-DD) → jornada. Días sin jornada NO están en el mapa. */
         val jornadasPorFecha: Map<String, JornadaListItemDto>,
     ) : CalendarioTabUiState
 }

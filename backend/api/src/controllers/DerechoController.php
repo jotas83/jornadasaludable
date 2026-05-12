@@ -42,7 +42,6 @@ final class DerechoController
         $stmt->execute([$codigo, 'es-ES']);
         $rows = $stmt->fetchAll();
         if (!$rows) {
-            // ¿La categoría existe?
             $check = Db::pdo()->prepare('SELECT id FROM ' . Db::table('derechos_categorias') . ' WHERE codigo = ?');
             $check->execute([$codigo]);
             if ($check->fetchColumn() === false) {
@@ -59,7 +58,7 @@ final class DerechoController
             Response::error('VALIDATION_ERROR', 'La búsqueda requiere al menos 3 caracteres.', 422);
         }
 
-        // Escape de wildcards LIKE: % _ \
+        // Escape de wildcards de LIKE.
         $like = '%' . addcslashes($q, '%_\\') . '%';
 
         $stmt = Db::pdo()->prepare(
@@ -110,14 +109,13 @@ final class DerechoController
             Response::error('NOT_FOUND', 'Derecho no encontrado.', 404);
         }
 
-        // Increment atómico de consultas_count (telemetría no-crítica).
+        // Telemetría no crítica: incrementamos consultas si la columna existe.
         try {
             Db::pdo()
                 ->prepare('UPDATE ' . Db::table('derechos') . ' SET consultas_count = consultas_count + 1 WHERE id = ?')
                 ->execute([(int) $row['id']]);
             $row['consultas_count'] = (int) $row['consultas_count'] + 1;
         } catch (\Throwable) {
-            // Despliegue desactualizado: la columna no existe. Silenciar.
         }
 
         unset($row['id']);

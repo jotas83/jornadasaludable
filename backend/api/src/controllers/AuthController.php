@@ -12,11 +12,7 @@ use Throwable;
 
 final class AuthController
 {
-    /**
-     * Hash bcrypt no resoluble. Anti-timing: password_verify se ejecuta
-     * siempre, evitando enumeración de usuarios.
-     * Generado offline con: password_hash(random_bytes(32), PASSWORD_BCRYPT, ['cost' => 12])
-     */
+    // Hash dummy para anti-timing: password_verify se ejecuta siempre.
     private const DUMMY_HASH = '$2y$12$5QZJk9YNhVRSCkBh/ehTwO9pCB1vRcfX0ZjV3VGtJ8VXDJSsU8tya';
 
     public function login(array $ctx): void
@@ -93,7 +89,7 @@ final class AuthController
         $stored    = (string) ($user['jwt_refresh_token'] ?? '');
         $presented = Auth::hashRefreshToken($refreshToken);
         if ($stored === '' || !hash_equals($stored, $presented)) {
-            // Posible reuso o robo: revocar todo.
+            // Posible reuso o robo: revocamos.
             $this->revokeRefresh($userId);
             Response::error('AUTH_TOKEN_REUSE', 'Refresh token inválido o reutilizado.', 401);
         }
@@ -123,8 +119,6 @@ final class AuthController
         }
         Response::noContent();
     }
-
-    // ---------- DAL ----------
 
     private function findByEmailOrNif(string $val): ?array
     {

@@ -14,22 +14,8 @@ import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Repositorio offline-first para crear y sincronizar fichajes.
- *
- * `crearFichaje`:
- *   1. Intenta POST /fichajes inmediato.
- *   2. Si éxito              → Synced(response).
- *   3. Si HTTP 4xx            → Failure(message) — error semántico, NO se
- *                              persiste local (reintentar no arregla un fichaje
- *                              rechazado por sin contrato/licencia).
- *   4. Si IOException         → persiste en Room PENDING + scheduleImmediateSync.
- *
- * `syncPendingNow`: ejecuta el cuerpo de sync directamente en una coroutine
- * (sin pasar por WorkManager). Lo usan tanto el SyncWorker (delegación) como
- * el botón "Sincronizar ahora" cuando NetworkMonitor confirma que hay red,
- * para evitar la latencia del constraint NETWORK_CONNECTED del worker.
- */
+// Repositorio offline-first para crear y sincronizar fichajes.
+// Un 4xx no se reintenta; un IOException se encola en Room para reintento.
 @Singleton
 class OfflineFichajeRepository @Inject constructor(
     private val api: ApiService,
@@ -58,11 +44,7 @@ class OfflineFichajeRepository @Inject constructor(
         }
     }
 
-    /**
-     * Sincroniza pendientes ahora mismo. Devuelve el número de fichajes
-     * confirmados por el backend. Si falla por IO, devuelve Failure para que
-     * el caller decida (reintentar luego, mostrar error).
-     */
+    // Sincroniza pendientes ahora. Devuelve el número de fichajes confirmados.
     suspend fun syncPendingNow(): Result<Int> {
         val pending = fichajeDao.getByStatus(FichajeEntity.STATUS_PENDING)
         Log.d(TAG, "syncPendingNow: ${pending.size} pendientes")
@@ -79,7 +61,7 @@ class OfflineFichajeRepository @Inject constructor(
             val results = body?.getAsJsonObject("data")?.getAsJsonArray("results")
 
             if (results == null) {
-                // Sin "results" parseables → asumimos éxito global (HTTP 200).
+                // Sin "results" parseable, asumimos éxito global por el HTTP 200.
                 fichajeDao.deleteByUuids(pending.map { it.uuid })
                 return Result.success(pending.size)
             }
@@ -110,8 +92,6 @@ class OfflineFichajeRepository @Inject constructor(
 
     suspend fun pendingCountOnce(): Int =
         fichajeDao.countByStatusOnce(FichajeEntity.STATUS_PENDING)
-
-    // ---------- helpers ----------
 
     private fun toApiItem(e: FichajeEntity): Map<String, Any?> = mapOf(
         "uuid"             to e.uuid,

@@ -42,14 +42,13 @@ class FicharTabFragment : Fragment() {
     private val dateFormatter   = DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(Locale("es", "ES"))
     private val historiaFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
-    /** Formato MySQL DATETIME(3) que devuelve el backend (UTC, sin offset). */
+    // Formatos MySQL DATETIME(3) y DATETIME que devuelve el backend (UTC).
     private val backendDateTimeMs   = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
     private val backendDateTimeNoMs = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
     private val locationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { _ ->
-        // Si el usuario concede o deniega, refrescamos GPS status.
         viewModel.onPermissionResult()
     }
 
@@ -75,7 +74,6 @@ class FicharTabFragment : Fragment() {
         binding.btnRetry.setOnClickListener  { viewModel.refresh() }
         binding.btnRequestPermission.setOnClickListener { requestLocationPermission() }
 
-        // Reloj en vivo
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 while (isActive) {
@@ -85,7 +83,6 @@ class FicharTabFragment : Fragment() {
             }
         }
 
-        // Estado del ViewModel
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.state.collect(::render)
@@ -132,7 +129,6 @@ class FicharTabFragment : Fragment() {
     private fun renderReady(s: FicharTabUiState.Ready) {
         Log.d("Fichar", "render: estado=${s.jornadaEstado} submitting=${s.submitting} " +
             "pending=${s.pendingOffline} offline=${s.offlineMode} pausa=${s.activePausa?.uuid?.take(8)}")
-        // GPS status
         val gps = s.gps
         binding.tvGpsStatus.text = when {
             !gps.hasPermission       -> getString(R.string.fichar_gps_sin_permiso)
@@ -142,7 +138,6 @@ class FicharTabFragment : Fragment() {
         }
         binding.btnRequestPermission.isVisible = !gps.hasPermission
 
-        // Botones según estado
         val canEntrada = s.jornadaEstado == JornadaEstado.IDLE && !s.submitting
         val canSalida  = s.jornadaEstado != JornadaEstado.IDLE && !s.submitting
         val canPausa   = s.jornadaEstado != JornadaEstado.IDLE && !s.submitting
@@ -150,7 +145,6 @@ class FicharTabFragment : Fragment() {
         binding.btnSalida.isEnabled  = canSalida
         binding.btnPausa.isEnabled   = canPausa
 
-        // Texto del botón pausa cambia según haya pausa abierta.
         binding.btnPausa.setText(
             if (s.jornadaEstado == JornadaEstado.EN_PAUSA) R.string.fichar_pausa_reanudar
             else R.string.fichar_pausa_iniciar
@@ -164,7 +158,6 @@ class FicharTabFragment : Fragment() {
 
         binding.submittingProgress.isVisible = s.submitting
 
-        // Badge + botón sync de pendientes offline (todo en offlineContainer)
         binding.offlineContainer.isVisible = s.pendingOffline > 0
         if (s.pendingOffline > 0) {
             binding.tvOfflineBadge.text = if (s.pendingOffline == 1)
@@ -173,10 +166,8 @@ class FicharTabFragment : Fragment() {
                 getString(R.string.fichar_offline_badge_n, s.pendingOffline)
         }
 
-        // Historial de hoy
         renderHistorial(s.historial)
 
-        // Mensaje transitorio
         s.transientMessage?.let { msg ->
             Snackbar.make(binding.root, msg, Snackbar.LENGTH_SHORT).show()
             viewModel.consumeMessage()
@@ -191,7 +182,6 @@ class FicharTabFragment : Fragment() {
         }
         binding.historialEmpty.isVisible = false
         val inflater = LayoutInflater.from(binding.root.context)
-        // Mostrar de más reciente a más antiguo
         fichajes.sortedByDescending { it.timestampEvento }.forEach { f ->
             val item = inflater.inflate(R.layout.item_fichaje_historial, binding.historialList, false)
             val tvHora = item.findViewById<android.widget.TextView>(R.id.tvHora)
@@ -202,14 +192,7 @@ class FicharTabFragment : Fragment() {
         }
     }
 
-    /**
-     * Convierte el timestamp del backend a HH:mm en la zona del dispositivo.
-     * Backend devuelve dos formatos:
-     *   - ISO con offset:        "2026-05-01T15:13:00+02:00"  (lo que envía el cliente)
-     *   - MySQL DATETIME(3) UTC: "2026-05-01 15:13:00.000"    (lo que persiste y relee)
-     * El segundo es el caso real al leer /fichajes. Asumimos UTC y convertimos
-     * a ZoneId.systemDefault() para mostrar la hora local.
-     */
+    // Acepta ISO con offset o MySQL DATETIME (asumimos UTC) y devuelve HH:mm local.
     private fun formatBackendTimestamp(ts: String): String {
         runCatching {
             return OffsetDateTime.parse(ts)

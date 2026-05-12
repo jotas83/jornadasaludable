@@ -17,17 +17,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Servicio de notificaciones locales para alertas legales (PRL).
- *
- * Canal único `ALERTAS_PRL` con importancia HIGH (heads-up + sonido).
- * El canal se crea idempotentemente desde Application.onCreate vía
- * ensureChannel(); en API < 26 es no-op.
- *
- * showAlerta() comprueba el permiso POST_NOTIFICATIONS (necesario en API 33+);
- * si no se ha concedido, hace un log y omite — no fallamos el flujo de fichaje
- * por una notificación que el usuario decidió no recibir.
- */
+// Notificaciones locales para alertas PRL.
 @Singleton
 class AlertaNotificationService @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -54,10 +44,7 @@ class AlertaNotificationService @Inject constructor(
         nm.createNotificationChannel(channel)
     }
 
-    /**
-     * Muestra una notificación. `notificationId` debe ser único por alerta —
-     * uuid.hashCode() es lo recomendado para que no se solapen ni dupliquen.
-     */
+    // notificationId debe ser único por alerta (uuid.hashCode()).
     fun showAlerta(
         notificationId: Int,
         tituloTipo: String,

@@ -18,14 +18,7 @@ import com.jornadasaludable.app.databinding.FragmentAlertasBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
-/**
- * Pantalla Alertas. Estructura:
- *   - Card fija arriba con indicador de burnout + 4 métricas.
- *   - TabLayout + ViewPager2 con 3 períodos: Hoy / Semana / Mes.
- *
- * Cada sub-fragmento (AlertaListFragment) toma el AlertasViewModel del
- * padre y filtra client-side por su período.
- */
+// Pantalla Alertas: card de burnout arriba + tabs Hoy/Semana/Mes.
 @AndroidEntryPoint
 class AlertasFragment : Fragment() {
 

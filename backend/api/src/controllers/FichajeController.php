@@ -22,7 +22,6 @@ final class FichajeController
 
         $uuid = $this->normalizeUuid($body['uuid'] ?? null);
 
-        // Idempotencia por uuid
         $existing = $this->findByUuid($uuid);
         if ($existing !== null && (int) $existing['user_id'] === $userId) {
             $jornada = $this->findJornadaById((int) $existing['jornada_id']);
@@ -33,7 +32,6 @@ final class FichajeController
             ]);
         }
 
-        // Empresa derivada del contrato vigente + verificación licencia
         $empresaId  = $this->deriveEmpresaIdOrFail($userId);
         $contratoId = $this->findContratoVigenteId($userId);
 
@@ -74,7 +72,7 @@ final class FichajeController
             Response::error('VALIDATION_ERROR', 'Cuerpo debe contener un array "fichajes".', 422);
         }
 
-        // Verificación empresa/licencia una sola vez (aborta el batch entero si falla).
+        // Una sola verificación de empresa/licencia para todo el batch.
         $empresaId  = $this->deriveEmpresaIdOrFail($userId);
         $contratoId = $this->findContratoVigenteId($userId);
 
@@ -125,7 +123,7 @@ final class FichajeController
             }
         }
 
-        // Recalc batched al final, una vez por jornada.
+        // Recalc al final, una vez por jornada.
         foreach (array_keys($jornadasAfectadas) as $jId) {
             $this->recalcJornada((int) $jId);
         }
@@ -168,11 +166,6 @@ final class FichajeController
         ]);
     }
 
-    // ---------- helpers ----------
-
-    /**
-     * @return array{0: string, 1: string, 2: string} [tipo, tsUtc, fechaJornadaLocal]
-     */
     private function validateFichajeInput(array $b): array
     {
         $tipo = strtoupper((string) ($b['tipo'] ?? ''));
@@ -188,7 +181,7 @@ final class FichajeController
         } catch (\Exception) {
             Response::error('VALIDATION_ERROR', 'timestamp_evento no es ISO 8601 válido.', 422);
         }
-        // Fecha de jornada: en la zona horaria del cliente (preserva offset).
+        // La fecha de la jornada se toma en la TZ del cliente.
         $fechaJornada = $dt->format('Y-m-d');
         $tsUtc        = $dt->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s.v');
         return [$tipo, $tsUtc, $fechaJornada];
@@ -259,18 +252,14 @@ final class FichajeController
             )->execute([Uuid::uuid4()->toString(), $userId, $contratoId, $fecha, 'SYNCED']);
             return (int) Db::pdo()->lastInsertId();
         } catch (PDOException) {
-            // Race: re-fetch
+            // Race con otro request: relemos.
             $stmt = Db::pdo()->prepare($sql);
             $stmt->execute([$userId, $fecha]);
             return (int) $stmt->fetchColumn();
         }
     }
 
-    /**
-     * Recorre fichajes de la jornada en orden cronológico, empareja
-     * ENTRADA→SALIDA y actualiza minutos_trabajados / hora_inicio /
-     * hora_fin / estado.
-     */
+    // Empareja ENTRADA→SALIDA en orden cronológico y actualiza la jornada.
     private function recalcJornada(int $jornadaId): void
     {
         $stmt = Db::pdo()->prepare(

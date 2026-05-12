@@ -34,15 +34,13 @@ class PerfilTabViewModel @Inject constructor(
                 _state.value = PerfilTabUiState.Error(it.message ?: "Error cargando perfil.")
                 return@launch
             }
-            // Empresa es opcional — si no hay contrato vigente, devuelve 404.
-            // No bloqueamos la pantalla; mostramos perfil sin bloque empresa.
+            // Si no hay contrato vigente, el endpoint devuelve 404; mostramos solo perfil.
             val empresa = empresaJob.await().getOrNull()
 
             _state.value = PerfilTabUiState.Success(perfil, empresa)
         }
     }
 
-    /** onDone se invoca tras limpiar tokens y cache. */
     fun logout(onDone: () -> Unit) {
         viewModelScope.launch {
             authRepository.logout()

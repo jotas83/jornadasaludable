@@ -30,8 +30,7 @@ final class UsuarioController
         $userId = (int) $ctx['auth']['sub'];
         $body   = $ctx['body'];
 
-        // Solo permitimos modificar campos seguros del perfil. NIF/email no se
-        // tocan aquí (son identidad legal/login — requieren flujo dedicado).
+        // NIF y email son identidad/login; se modifican por flujo dedicado.
         $allowed = ['nombre', 'apellidos', 'telefono', 'idioma', 'fecha_nacimiento', 'nacionalidad'];
         $sets = [];
         $vals = [];
@@ -49,7 +48,7 @@ final class UsuarioController
             ->prepare('UPDATE ' . Db::table('users') . ' SET ' . implode(', ', $sets) . ' WHERE id = ?')
             ->execute($vals);
 
-        $this->perfil($ctx); // termina con Response::ok
+        $this->perfil($ctx);
     }
 
     public function empresa(array $ctx): void

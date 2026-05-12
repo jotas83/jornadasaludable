@@ -1,8 +1,5 @@
--- =============================================================================
--- Seed: José Pérez García (44444444D) — perfil "despistado"
--- Corregido: campo validada_at en lugar de validada
---            estado CORREGIDA en lugar de INCOMPLETA (no existe en el enum)
--- =============================================================================
+-- Seed José Pérez García (44444444D) — perfil "despistado, que se olvida de fichar entrada y salida".
+-- Muestra los distintos estados de jornada en el calendario.
 
 SET NAMES utf8mb4;
 SET @today = CURDATE();
@@ -36,7 +33,7 @@ VALUES (
     1, NOW(), NOW()
 );
 
--- SEMANA -4: VALIDADAS (verde) — validada_at relleno
+-- Semana -4: VALIDADAS
 INSERT INTO js5_js_jornadas
     (uuid, user_id, fecha, hora_inicio, hora_fin,
      minutos_trabajados, minutos_pausa, minutos_extra,
@@ -52,7 +49,7 @@ SELECT
 FROM (SELECT 0 AS seq UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4) d
 WHERE DAYOFWEEK(DATE_SUB(@today, INTERVAL (28 + (4 - seq)) DAY)) NOT IN (1, 7);
 
--- SEMANA -3: CERRADAS (azul)
+-- Semana -3: CERRADAS
 INSERT INTO js5_js_jornadas
     (uuid, user_id, fecha, hora_inicio, hora_fin,
      minutos_trabajados, minutos_pausa, minutos_extra,
@@ -68,8 +65,7 @@ SELECT
 FROM (SELECT 0 AS seq UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4) d
 WHERE DAYOFWEEK(DATE_SUB(@today, INTERVAL (21 + (4 - seq)) DAY)) NOT IN (1, 7);
 
--- SEMANA -2: Lunes/Martes/Miércoles CORREGIDA (sin hora_fin = olvidó fichar salida)
--- Usamos CORREGIDA porque INCOMPLETA no existe en el enum
+-- Semana -2 (L/M/X): CORREGIDA — olvidó fichar salida
 INSERT INTO js5_js_jornadas
     (uuid, user_id, fecha, hora_inicio, hora_fin,
      minutos_trabajados, minutos_pausa, minutos_extra,
@@ -85,7 +81,7 @@ SELECT
 FROM (SELECT 0 AS seq UNION SELECT 1 UNION SELECT 2) d
 WHERE DAYOFWEEK(DATE_SUB(@today, INTERVAL (14 + (4 - seq)) DAY)) NOT IN (1, 7);
 
--- SEMANA -2: Jueves/Viernes CERRADAS
+-- Semana -2 (J/V): CERRADAS
 INSERT INTO js5_js_jornadas
     (uuid, user_id, fecha, hora_inicio, hora_fin,
      minutos_trabajados, minutos_pausa, minutos_extra,
@@ -101,7 +97,7 @@ SELECT
 FROM (SELECT 3 AS seq UNION SELECT 4) d
 WHERE DAYOFWEEK(DATE_SUB(@today, INTERVAL (14 + (4 - seq)) DAY)) NOT IN (1, 7);
 
--- SEMANA -1: CERRADAS (azul)
+-- Semana -1: CERRADAS
 INSERT INTO js5_js_jornadas
     (uuid, user_id, fecha, hora_inicio, hora_fin,
      minutos_trabajados, minutos_pausa, minutos_extra,
@@ -117,7 +113,7 @@ SELECT
 FROM (SELECT 0 AS seq UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4) d
 WHERE DAYOFWEEK(DATE_SUB(@today, INTERVAL (7 + (4 - seq)) DAY)) NOT IN (1, 7);
 
--- HOY: ABIERTA (amarillo)
+-- Hoy: ABIERTA
 INSERT INTO js5_js_jornadas
     (uuid, user_id, fecha, hora_inicio, hora_fin,
      minutos_trabajados, minutos_pausa, minutos_extra,
@@ -130,7 +126,7 @@ VALUES (
     NOW(), NOW()
 );
 
--- Fichajes ENTRADA para todas las jornadas
+-- Fichajes de entrada
 INSERT INTO js5_js_fichajes
     (uuid, user_id, jornada_id, tipo, timestamp_evento,
      latitud, longitud, metodo, sync_status, created_at, updated_at)
@@ -140,7 +136,7 @@ SELECT
 FROM js5_js_jornadas j
 WHERE j.user_id = @jose_id AND j.hora_inicio IS NOT NULL;
 
--- Fichajes SALIDA solo para jornadas con hora_fin
+-- Fichajes de salida (solo cuando hay hora_fin)
 INSERT INTO js5_js_fichajes
     (uuid, user_id, jornada_id, tipo, timestamp_evento,
      latitud, longitud, metodo, sync_status, created_at, updated_at)

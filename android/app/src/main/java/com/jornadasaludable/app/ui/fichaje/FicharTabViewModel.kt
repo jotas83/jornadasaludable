@@ -31,8 +31,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FicharTabViewModel @Inject constructor(
-    private val fichajeRepository:        FichajeRepository,        // listado de hoy (lectura)
-    private val offlineFichajeRepository: OfflineFichajeRepository, // creación offline-first + sync
+    private val fichajeRepository:        FichajeRepository,
+    private val offlineFichajeRepository: OfflineFichajeRepository,
     private val pausaRepository:          PausaRepository,
     private val alertaRepository:         AlertaRepository,
     private val notificationService:      AlertaNotificationService,
@@ -46,8 +46,6 @@ class FicharTabViewModel @Inject constructor(
 
     init {
         refresh()
-        // El badge de pendientes offline se actualiza en cuanto el SyncWorker
-        // borra filas o el usuario encola un fichaje nuevo.
         viewModelScope.launch {
             offlineFichajeRepository.pendingCountFlow().collectLatest { count ->
                 _state.update {
@@ -57,15 +55,7 @@ class FicharTabViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Carga el estado del día. Si el endpoint de fichajes falla por IOException
-     * (sin red, timeout) NO bloqueamos la UI: el usuario debe poder seguir
-     * fichando — el fichaje irá a la cola offline. Marcamos `offlineMode=true`
-     * para mostrarlo en la pantalla.
-     *
-     * Solo bloqueamos con Error si el fallo es semántico (4xx/5xx, JSON inválido…)
-     * que un retry podría arreglar.
-     */
+    // Un IOException no bloquea la UI: el fichaje irá a la cola offline.
     fun refresh() {
         viewModelScope.launch {
             _state.value = FicharTabUiState.Loading
@@ -85,7 +75,6 @@ class FicharTabViewModel @Inject constructor(
             val cronologico = historial.sortedBy { it.timestampEvento }
             val ultimo = cronologico.lastOrNull()
 
-            // Detectar pausa abierta solo si estamos trabajando y hay red.
             val activePausa = if (ultimo?.tipo == "ENTRADA" && !isOffline) {
                 detectActivePausa(today)
             } else null
@@ -98,9 +87,7 @@ class FicharTabViewModel @Inject constructor(
 
             val pendingCount = offlineFichajeRepository.pendingCountOnce()
 
-            // Si volvimos a tener red Y hay pendientes, dispara sync inmediato.
-            // No esperamos al periodic 15-min: el usuario espera ver los fichajes
-            // sincronizados en cuanto vuelve la conexión.
+            // Si hemos recuperado la red y quedan pendientes, dispara sync ya.
             if (!isOffline && pendingCount > 0) {
                 Log.d(TAG, "online + $pendingCount pendientes → scheduleImmediateSync()")
                 syncScheduler.scheduleImmediateSync()
@@ -133,16 +120,10 @@ class FicharTabViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Una sola acción para INICIO/FIN — el botón muestra "Iniciar pausa" o
-     * "Reanudar" según haya pausa abierta. La resolución del target en FIN se
-     * hace por uuid (cargado en `activePausa`); si no, el backend cae al
-     * fallback "última pausa abierta del mismo tipo".
-     */
     fun togglePausa() {
         val current = _state.value
         if (current !is FicharTabUiState.Ready || current.submitting) return
-        if (current.jornadaEstado == JornadaEstado.IDLE) return  // sin jornada no hay pausa
+        if (current.jornadaEstado == JornadaEstado.IDLE) return
 
         viewModelScope.launch {
             _state.value = current.copy(submitting = true, transientMessage = null)
@@ -152,7 +133,6 @@ class FicharTabViewModel @Inject constructor(
             val ts  = now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
 
             val result = if (current.activePausa != null) {
-                // FIN
                 pausaRepository.finalizar(
                     timestampIso = ts,
                     tipo         = current.activePausa.tipo,
@@ -161,7 +141,6 @@ class FicharTabViewModel @Inject constructor(
                     longitud     = location?.longitude,
                 )
             } else {
-                // INICIO
                 pausaRepository.iniciar(
                     timestampIso = ts,
                     tipo         = "DESCANSO_LEGAL",
@@ -225,8 +204,6 @@ class FicharTabViewModel @Inject constructor(
                             _state.update { (it as? FicharTabUiState.Ready)?.copy(
                                 transientMessage = "Sin conexión. Guardado offline; se sincronizará al recuperar red.",
                                 submitting = false,
-                                // Computamos estado local manualmente: si era IDLE y fichamos ENTRADA,
-                                // pasamos a TRABAJANDO; si era TRABAJANDO/EN_PAUSA y fichamos SALIDA, a IDLE.
                                 jornadaEstado = nextEstadoLocal(it.jornadaEstado, tipo),
                             ) ?: it }
                         }
@@ -262,11 +239,6 @@ class FicharTabViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Busca una pausa con `fin = null` cuyo `inicio` sea de hoy. La consulta
-     * se hace sin filtro de jornada (no tenemos el uuid de la jornada local) y
-     * devuelve a lo sumo 20 — suficiente para detectar la abierta más reciente.
-     */
     private suspend fun detectActivePausa(todayIsoDate: String): ActivePausa? {
         val pausas: List<PausaDto> = pausaRepository.list(limit = 20).getOrNull() ?: return null
         return pausas.firstOrNull { p ->
@@ -274,18 +246,7 @@ class FicharTabViewModel @Inject constructor(
         }?.let { ActivePausa(uuid = it.uuid, tipo = it.tipo) }
     }
 
-    /**
-     * Disparada por el botón "Sincronizar ahora". Doble vía:
-     *
-     *   - Si NetworkMonitor reporta red disponible → ejecuta el sync DIRECTO
-     *     en una coroutine (vía OfflineFichajeRepository.syncPendingNow).
-     *     Esto evita la latencia del constraint NETWORK_CONNECTED del
-     *     OneTimeWorkRequest, que en emuladores con WiFi alternada tarda en
-     *     detectarse y a veces no se dispara.
-     *
-     *   - Si no hay red → cae a scheduleImmediateSync (queda parked hasta que
-     *     vuelva la conexión).
-     */
+    // Si hay red, sincroniza directo; si no, deja un work parked.
     fun syncNow() {
         val ready = _state.value as? FicharTabUiState.Ready ?: return
         if (ready.submitting) return

@@ -11,11 +11,6 @@ data class InformesTabUiState(
     val loadingList: Boolean = true,
     val errorList: String? = null,
     val transientMessage: String? = null,
-    /** UUID del documento siendo descargado en este momento (para mostrar spinner). */
     val downloadingUuid: String? = null,
-    /**
-     * Fichero PDF listo para abrir. El Fragment lo consume con
-     * `consumePendingOpenFile()` tras lanzar el Intent ACTION_VIEW.
-     */
     val pendingOpenFile: File? = null,
 )

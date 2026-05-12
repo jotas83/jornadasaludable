@@ -14,7 +14,6 @@ class PausaRepository @Inject constructor(
     private val api: ApiService,
     private val gson: Gson,
 ) {
-    /** Lista pausas del usuario; opcionalmente filtra por jornada. */
     suspend fun list(jornadaUuid: String? = null, limit: Int = 50): Result<List<PausaDto>> {
         val params = mutableMapOf("limit" to limit.toString())
         if (jornadaUuid != null) params["jornada_uuid"] = jornadaUuid

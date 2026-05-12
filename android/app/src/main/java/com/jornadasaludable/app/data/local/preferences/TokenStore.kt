@@ -14,14 +14,7 @@ import javax.inject.Singleton
 
 private val Context.authDataStore by preferencesDataStore(name = "auth_prefs")
 
-/**
- * Persistencia de tokens JWT vía DataStore Preferences. Storage cifrado por
- * defecto del sistema; el fichero queda excluido de auto-backup
- * (data_extraction_rules.xml + backup_rules.xml).
- *
- * Lecturas síncronas (`accessTokenBlocking`) solo desde threads no-main:
- * el AuthInterceptor de OkHttp corre en thread de red.
- */
+// Persistencia de tokens JWT con DataStore. Excluido de auto-backup.
 @Singleton
 class TokenStore @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -45,9 +38,7 @@ class TokenStore @Inject constructor(
         context.authDataStore.edit { it.clear() }
     }
 
-    /** Lectura bloqueante para uso desde OkHttp Interceptor. NO llamar en main thread. */
+    // Bloqueante: solo desde threads de red (OkHttp Interceptor/Authenticator).
     fun accessTokenBlocking(): String? = runBlocking { accessToken.first() }
-
-    /** Igual que `accessTokenBlocking` pero para el refresh — uso desde OkHttp Authenticator. */
     fun refreshTokenBlocking(): String? = runBlocking { refreshToken.first() }
 }

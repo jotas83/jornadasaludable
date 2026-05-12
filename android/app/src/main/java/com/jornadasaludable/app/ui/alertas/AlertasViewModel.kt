@@ -14,11 +14,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-/**
- * ViewModel compartido por AlertasFragment y sus 3 sub-fragmentos
- * (Hoy/Semana/Mes). Los hijos lo obtienen vía:
- *   private val parentVM: AlertasViewModel by viewModels({ requireParentFragment() })
- */
+// VM compartido por AlertasFragment y sus tres tabs (Hoy/Semana/Mes).
 @HiltViewModel
 class AlertasViewModel @Inject constructor(
     private val alertaRepository:  AlertaRepository,
@@ -35,31 +31,16 @@ class AlertasViewModel @Inject constructor(
 
     init { load() }
 
-    /**
-     * Estrategia de carga del bloque burnout:
-     *   1. POST /alertas/generar fuerza al backend a recalcular y persistir
-     *      la evaluación. La respuesta incluye un campo `burnout` con los
-     *      valores recién calculados — más fiable que GET /burnout, que puede
-     *      devolver `actual=null` si la tabla histórica está vacía.
-     *   2. GET /burnout como fallback (último histórico persistido).
-     *   3. Display: lo más fresco de los dos. generar.burnout > actual > null.
-     *
-     * Si ambas calls fallan, mostramos error solo si TAMBIÉN la lista de
-     * alertas falla; si solo falla burnout, tab del burnout queda en Ready
-     * con null y la UI muestra "Sin datos suficientes".
-     */
+    // generar() es la fuente principal de burnout (lo recalcula); GET /burnout es fallback.
     fun load() {
         viewModelScope.launch {
             _state.update { it.copy(burnout = Loadable.Loading, alertas = Loadable.Loading) }
 
-            // Paralelo: generar (fuerza recálculo) + listAll (lista alertas).
             val generarJob = async { alertaRepository.generar() }
             val alertasJob = async { alertaRepository.listAll() }
 
-            // generar() devuelve burnout fresco si tiene éxito
             val generarBurnout: BurnoutEvaluacionDto? = generarJob.await().getOrNull()?.burnout
 
-            // GET /burnout como fallback — solo si generar no nos dio nada
             val historyBurnout: BurnoutEvaluacionDto? = if (generarBurnout == null) {
                 burnoutRepository.load().getOrNull()?.actual
             } else null

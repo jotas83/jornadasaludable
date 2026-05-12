@@ -15,11 +15,7 @@ enum class AlertaPeriod(val tabIndex: Int) {
 
 private val backendDateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
-/**
- * Filtra alertas por período usando `fecha_generacion`. El formato del
- * backend es "YYYY-MM-DD HH:mm:ss" (DATETIME). Si el parseo falla (formato
- * inesperado), la alerta se incluye igualmente en el período más amplio (MES).
- */
+// Si el parseo falla, la alerta se cuela solo en MES (el período más amplio).
 fun List<AlertaDto>.filterByPeriod(period: AlertaPeriod): List<AlertaDto> {
     val today = LocalDate.now()
     val limit = when (period) {

@@ -2,9 +2,6 @@ package com.jornadasaludable.app.data.api.dto
 
 import com.google.gson.annotations.SerializedName
 
-/**
- * GET /usuarios/perfil → datos del trabajador autenticado.
- */
 data class PerfilDto(
     val id: Long,
     val uuid: String,
@@ -21,9 +18,6 @@ data class PerfilDto(
     @SerializedName("created_at")       val createdAt: String?,
 )
 
-/**
- * GET /usuarios/empresa → empresa actual derivada del contrato vigente.
- */
 data class EmpresaDto(
     val id: Long,
     val cif: String,

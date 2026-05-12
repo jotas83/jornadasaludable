@@ -37,7 +37,7 @@ final class BurnoutController
 
         Response::ok([
             'items'  => $items,
-            'actual' => $items[0] ?? null,  // la más reciente
+            'actual' => $items[0] ?? null,
             'limit'  => $limit,
             'offset' => $offset,
         ]);

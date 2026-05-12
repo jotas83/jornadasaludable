@@ -1,32 +1,14 @@
--- =============================================================================
---  Seed pruebas Capítulo 5 — datos de validación de alertas y burnout
---  Prefijo: js5_js_
---  Trabajadores: Pedro Martínez (11111111A), Laura Sánchez (22222222B),
---                Miguel Torres (33333333C)
---  Credenciales: password "test1234" (bcrypt cost 12)
---
---  Idempotente: DELETE inicial por NIF cascadea jornadas/fichajes/pausas/
---  alertas/burnout/documentos via FK ON DELETE CASCADE.
---
---  Códigos de alerta (catálogo js5_js_alertas_tipos):
---    JORNADA_EXCEDIDA      → "jornada diaria excesiva"        (Pedro)
---    PAUSA_OMITIDA         → "pausa diaria no realizada"      (Pedro)
---    SIN_DESCANSO_SEMANAL  → "descanso semanal no respetado"  (Laura)
---    HORAS_EXTRA_LIMITE    → "límite anual horas extras"      (Miguel)
---    RIESGO_BURNOUT        → "riesgo burnout detectado"       (Miguel/Laura)
--- =============================================================================
+-- Seed Capítulo 5 — validación de alertas y burnout.
+-- Trabajadores: Pedro (11111111A), Laura (22222222B), Miguel (33333333C).
+-- Password "test1234". Idempotente: el DELETE inicial cascadea por FK.
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 1;
 
--- -----------------------------------------------------------------------------
--- 0. Limpieza idempotente
--- -----------------------------------------------------------------------------
+-- Limpieza previa
 DELETE FROM js5_js_users WHERE nif IN ('11111111A', '22222222B', '33333333C');
 
--- -----------------------------------------------------------------------------
--- 1. Variables base — empresa, sector, hash bcrypt e IDs de tipos de alerta
--- -----------------------------------------------------------------------------
+-- Variables base
 SET @empresa_id := (SELECT MIN(id) FROM js5_js_empresas);
 SET @sector_id  := (SELECT MIN(id) FROM js5_js_sectores);
 SET @bcrypt     := '$2y$12$k88seOXqpqLK1nj8WDxRUeCMZQaO3RNM25B4ChYIAnos5268nNQiy';
@@ -38,9 +20,7 @@ SET @t_semanal  := (SELECT id FROM js5_js_alertas_tipos WHERE codigo = 'SIN_DESC
 SET @t_extras   := (SELECT id FROM js5_js_alertas_tipos WHERE codigo = 'HORAS_EXTRA_LIMITE');
 SET @t_burnout  := (SELECT id FROM js5_js_alertas_tipos WHERE codigo = 'RIESGO_BURNOUT');
 
--- -----------------------------------------------------------------------------
--- 2. Trabajadores
--- -----------------------------------------------------------------------------
+-- Trabajadores
 INSERT INTO js5_js_users
   (uuid, nif, nombre, apellidos, email, idioma, password_hash, activo, created_at)
 VALUES
@@ -52,9 +32,7 @@ SET @pedro_id  := (SELECT id FROM js5_js_users WHERE nif = '11111111A');
 SET @laura_id  := (SELECT id FROM js5_js_users WHERE nif = '22222222B');
 SET @miguel_id := (SELECT id FROM js5_js_users WHERE nif = '33333333C');
 
--- -----------------------------------------------------------------------------
--- 3. Contratos vigentes (jornada completa 40 h/semana, indefinidos)
--- -----------------------------------------------------------------------------
+-- Contratos vigentes (40 h/semana, indefinidos)
 INSERT INTO js5_js_contratos
   (uuid, user_id, empresa_id, tipo, jornada_tipo, horas_semanales, fecha_inicio, vigente, created_at)
 VALUES
@@ -66,12 +44,9 @@ SET @pedro_contrato  := (SELECT id FROM js5_js_contratos WHERE user_id = @pedro_
 SET @laura_contrato  := (SELECT id FROM js5_js_contratos WHERE user_id = @laura_id  AND vigente = 1);
 SET @miguel_contrato := (SELECT id FROM js5_js_contratos WHERE user_id = @miguel_id AND vigente = 1);
 
--- =============================================================================
--- 4. JORNADAS — 30 días con timestamps reales relativos a CURDATE()
--- =============================================================================
+-- JORNADAS (30 días relativos a hoy)
 
--- 4.1 Pedro: 22 días laborables (lun-vie), 10.5 h seguidas SIN PAUSA
---      08:00 → 18:30  ⇒ jornada > 9 h y > 6 h sin pausa
+-- Pedro: 22 días laborables, 10.5 h sin pausa (jornada excedida y sin descanso)
 INSERT INTO js5_js_jornadas
   (uuid, user_id, contrato_id, fecha, hora_inicio, hora_fin,
    minutos_trabajados, minutos_pausa, minutos_extra, estado, sync_status, created_at)
@@ -88,8 +63,7 @@ FROM (
   UNION SELECT 1  UNION SELECT 0
 ) AS dias_pedro;
 
--- 4.2 Laura: 30 días SEGUIDOS (sin descanso semanal). Jornada 8 h normal con pausa.
---      09:00 → 18:00 con 60 min de pausa de comida
+-- Laura: 30 días seguidos sin descanso semanal, 8 h con pausa de comida
 INSERT INTO js5_js_jornadas
   (uuid, user_id, contrato_id, fecha, hora_inicio, hora_fin,
    minutos_trabajados, minutos_pausa, minutos_extra, estado, sync_status, created_at)
@@ -107,8 +81,7 @@ FROM (
   UNION SELECT 4  UNION SELECT 3  UNION SELECT 2  UNION SELECT 1  UNION SELECT 0
 ) AS dias_laura;
 
--- 4.3 Miguel: 26 días (6 días/semana, salta 4 "domingos"). Jornadas de 11 h efectivas.
---      08:00 → 20:00 con 60 min de pausa  ⇒ 660 min trabajados, 180 min extra/día
+-- Miguel: 26 días, 11 h efectivas, 180 min extra/día
 INSERT INTO js5_js_jornadas
   (uuid, user_id, contrato_id, fecha, hora_inicio, hora_fin,
    minutos_trabajados, minutos_pausa, minutos_extra, estado, sync_status, created_at)
@@ -126,11 +99,9 @@ FROM (
   UNION SELECT 0
 ) AS dias_miguel;
 
--- =============================================================================
--- 5. FICHAJES — 1 ENTRADA + 1 SALIDA por jornada, derivados de hora_inicio/fin
--- =============================================================================
+-- FICHAJES (entrada + salida por jornada)
 
--- 5.1 ENTRADAS
+-- Entradas
 INSERT INTO js5_js_fichajes
   (uuid, jornada_id, user_id, empresa_id, tipo, timestamp_evento,
    metodo, sync_status, created_at)
@@ -140,7 +111,7 @@ FROM js5_js_jornadas j
 WHERE j.user_id IN (@pedro_id, @laura_id, @miguel_id)
   AND j.hora_inicio IS NOT NULL;
 
--- 5.2 SALIDAS
+-- Salidas
 INSERT INTO js5_js_fichajes
   (uuid, jornada_id, user_id, empresa_id, tipo, timestamp_evento,
    metodo, sync_status, created_at)
@@ -150,9 +121,7 @@ FROM js5_js_jornadas j
 WHERE j.user_id IN (@pedro_id, @laura_id, @miguel_id)
   AND j.hora_fin IS NOT NULL;
 
--- =============================================================================
--- 6. PAUSAS — Pedro NINGUNA (PAUSA_OMITIDA), Laura y Miguel pausa de comida 60 min
--- =============================================================================
+-- PAUSAS: Pedro ninguna; Laura y Miguel pausa de comida de 60 min
 INSERT INTO js5_js_pausas
   (uuid, jornada_id, tipo, inicio, fin, minutos, computa_jornada, sync_status, created_at)
 SELECT UUID(), j.id, 'COMIDA',
@@ -162,9 +131,7 @@ SELECT UUID(), j.id, 'COMIDA',
 FROM js5_js_jornadas j
 WHERE j.user_id IN (@laura_id, @miguel_id);
 
--- =============================================================================
--- 7. HORAS EXTRA — Miguel acumula 26 × 180 min = 4680 min ≈ 78 h en el mes
--- =============================================================================
+-- HORAS EXTRA: Miguel acumula ≈ 78 h al mes
 INSERT INTO js5_js_horas_extra
   (uuid, jornada_id, user_id, minutos, tipo, compensacion, estado,
    aceptada_trabajador, created_at)
@@ -174,7 +141,7 @@ FROM js5_js_jornadas j
 WHERE j.user_id = @miguel_id
   AND j.minutos_extra > 0;
 
--- También las horas extra diarias de Pedro (90 min × 22 días = 1980 min ≈ 33 h)
+-- Horas extra diarias de Pedro
 INSERT INTO js5_js_horas_extra
   (uuid, jornada_id, user_id, minutos, tipo, compensacion, estado,
    aceptada_trabajador, created_at)
@@ -184,11 +151,9 @@ FROM js5_js_jornadas j
 WHERE j.user_id = @pedro_id
   AND j.minutos_extra > 0;
 
--- =============================================================================
--- 8. ALERTAS pre-generadas (las que el motor evaluador habría producido)
--- =============================================================================
+-- ALERTAS pre-generadas
 
--- 8.1 Pedro — JORNADA_EXCEDIDA por cada jornada > 540 min
+-- Pedro: JORNADA_EXCEDIDA por jornada > 540 min
 INSERT INTO js5_js_alertas
   (uuid, user_id, tipo_id, jornada_id, fecha_evento, mensaje,
    valor_detectado, leida, notificada_push, created_at)
@@ -202,7 +167,7 @@ FROM js5_js_jornadas j
 WHERE j.user_id = @pedro_id
   AND j.minutos_trabajados > 540;
 
--- 8.2 Pedro — PAUSA_OMITIDA por jornada > 360 min sin pausas
+-- Pedro: PAUSA_OMITIDA por jornada > 360 min sin pausas
 INSERT INTO js5_js_alertas
   (uuid, user_id, tipo_id, jornada_id, fecha_evento, mensaje,
    valor_detectado, leida, notificada_push, created_at)
@@ -215,7 +180,7 @@ WHERE j.user_id = @pedro_id
   AND j.minutos_trabajados > 360
   AND j.minutos_pausa  = 0;
 
--- 8.3 Laura — SIN_DESCANSO_SEMANAL: 4 alertas (una por semana sin descanso)
+-- Laura: SIN_DESCANSO_SEMANAL, una alerta por semana
 INSERT INTO js5_js_alertas
   (uuid, user_id, tipo_id, jornada_id, fecha_evento, mensaje,
    valor_detectado, leida, notificada_push, created_at)
@@ -232,7 +197,7 @@ WHERE j.user_id = @laura_id
     DATE_SUB(@today, INTERVAL  2 DAY)
   );
 
--- 8.4 Miguel — HORAS_EXTRA_LIMITE: alerta única en el último día
+-- Miguel: HORAS_EXTRA_LIMITE en el último día
 INSERT INTO js5_js_alertas
   (uuid, user_id, tipo_id, jornada_id, fecha_evento, mensaje,
    valor_detectado, leida, notificada_push, created_at)
@@ -244,7 +209,7 @@ FROM js5_js_jornadas j
 WHERE j.user_id = @miguel_id
   AND j.fecha = DATE_SUB(@today, INTERVAL 0 DAY);
 
--- 8.5 Miguel — RIESGO_BURNOUT
+-- Miguel: RIESGO_BURNOUT
 INSERT INTO js5_js_alertas
   (uuid, user_id, tipo_id, jornada_id, fecha_evento, mensaje,
    valor_detectado, leida, notificada_push, created_at)
@@ -253,23 +218,16 @@ VALUES
    'Evaluación periódica arroja nivel ALTO de riesgo de burnout (Ley 31/1995 PRL).',
    '78 puntos', 0, 1, NOW());
 
--- =============================================================================
--- 9. EVALUACIONES DE BURNOUT
--- =============================================================================
+-- Evaluaciones de burnout
 INSERT INTO js5_js_burnout_evaluaciones
   (user_id, fecha_evaluacion, horas_promedio_dia, dias_sin_descanso,
    jornadas_excesivas, puntuacion, nivel, created_at)
 VALUES
-  -- Laura: MODERADO (8 h/día pero 30 días sin descanso semanal)
-  (@laura_id,  NOW(), 8.00, 30,  0, 55.00, 'MODERADO', NOW()),
-  -- Miguel: ALTO (11 h/día efectivas + horas extra acumuladas)
-  (@miguel_id, NOW(), 11.00, 0, 26, 78.00, 'ALTO',     NOW()),
-  -- Pedro: MODERADO (jornadas excesivas sin pausa pero con descanso semanal)
-  (@pedro_id,  NOW(), 10.50, 0, 22, 60.00, 'MODERADO', NOW());
+  (@laura_id,  NOW(),  8.00, 30,  0, 55.00, 'MODERADO', NOW()),
+  (@miguel_id, NOW(), 11.00,  0, 26, 78.00, 'ALTO',     NOW()),
+  (@pedro_id,  NOW(), 10.50,  0, 22, 60.00, 'MODERADO', NOW());
 
--- =============================================================================
--- 10. DOCUMENTOS — un PDF mensual por trabajador (registro de jornada)
--- =============================================================================
+-- Documentos: un PDF mensual por trabajador
 INSERT INTO js5_js_documentos
   (uuid, user_id, tipo, periodo_desde, periodo_hasta,
    nombre_fichero, ruta_storage, tamano_bytes, hash_sha256, firmado, created_at)
@@ -290,12 +248,9 @@ VALUES
    CONCAT('documentos/', @miguel_id, '/', YEAR(@today), '/registro_miguel_', DATE_FORMAT(@today, '%Y%m'), '.pdf'),
    142890, REPEAT('c', 64), 0, NOW());
 
--- =============================================================================
--- 11. SELECT DE VERIFICACIÓN
---     Ejecutar en el cliente MySQL después del seed para validar resultados.
--- =============================================================================
+-- Verificación
 
--- 11.1 Resumen de jornadas y minutos por trabajador
+-- Jornadas y minutos por trabajador
 SELECT
   u.nif,
   CONCAT(u.apellidos, ', ', u.nombre)               AS trabajador,
@@ -311,10 +266,7 @@ WHERE u.nif IN ('11111111A', '22222222B', '33333333C')
 GROUP BY u.id, u.nif, u.apellidos, u.nombre
 ORDER BY u.apellidos;
 
--- 11.2 Racha máxima de días consecutivos trabajados (Laura debería dar >= 7)
---      Estrategia clásica para "islas en MySQL": LAG → marcar saltos (>1 día) →
---      acumular en grupo con SUM ventana → agrupar y contar. Sin window
---      functions anidadas (cada nivel hace una sola).
+-- Racha máxima de días consecutivos trabajados (técnica de "islas")
 SELECT
   u.nif,
   CONCAT(u.apellidos, ', ', u.nombre) AS trabajador,
@@ -343,7 +295,7 @@ WHERE u.nif IN ('11111111A', '22222222B', '33333333C')
 GROUP BY u.id, u.nif, u.apellidos, u.nombre
 ORDER BY u.apellidos;
 
--- 11.3 Alertas generadas por trabajador y tipo
+-- Alertas por trabajador y tipo
 SELECT
   u.nif,
   CONCAT(u.apellidos, ', ', u.nombre) AS trabajador,
@@ -357,7 +309,7 @@ WHERE u.nif IN ('11111111A', '22222222B', '33333333C')
 GROUP BY u.id, u.nif, u.apellidos, u.nombre, t.id, t.codigo, t.severidad
 ORDER BY u.apellidos, t.codigo;
 
--- 11.4 Burnout y documentos generados
+-- Burnout y documentos generados
 SELECT
   u.nif,
   CONCAT(u.apellidos, ', ', u.nombre) AS trabajador,
@@ -371,26 +323,7 @@ WHERE u.nif IN ('11111111A', '22222222B', '33333333C')
 GROUP BY u.id, u.nif, u.apellidos, u.nombre, b.id, b.nivel, b.puntuacion
 ORDER BY u.apellidos;
 
--- =============================================================================
 -- Resultados esperados:
---
---   11.1 jornadas / excedidas / sin_pausa / total_h_extra
---          Pedro   22 / 22 / 22 / 33.0
---          Laura   30 /  0 /  0 /  0.0
---          Miguel  26 /  0 /  0 / 78.0
---
---   11.2 dias_consecutivos_max
---          Pedro    aprox 5
---          Laura    30
---          Miguel   aprox 6
---
---   11.3 alertas (mínimo)
---          Pedro    JORNADA_EXCEDIDA × 22, PAUSA_OMITIDA × 22
---          Laura    SIN_DESCANSO_SEMANAL × 4
---          Miguel   HORAS_EXTRA_LIMITE × 1, RIESGO_BURNOUT × 1
---
---   11.4 burnout_nivel / pdfs
---          Pedro    MODERADO / 1
---          Laura    MODERADO / 1
---          Miguel   ALTO     / 1
--- =============================================================================
+--   Pedro   22 jornadas, 22 excedidas, 22 sin pausa, 33 h extra. MODERADO.
+--   Laura   30 jornadas, racha de 30 días, 4 alertas semanales. MODERADO.
+--   Miguel  26 jornadas, 78 h extra, RIESGO_BURNOUT. ALTO.

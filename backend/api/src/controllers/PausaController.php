@@ -79,7 +79,6 @@ final class PausaController
 
         $uuid = $this->normalizeUuid($b['uuid'] ?? null);
 
-        // Idempotencia
         $existing = $this->findByUuid($uuid);
         if ($existing !== null && (int) $existing['jornada_id'] === (int) $jornada['id']) {
             Response::ok(['pausa' => $this->mapPausa($existing), 'jornada' => ['uuid' => $jornada['uuid']], 'idempotent' => true]);
@@ -117,7 +116,7 @@ final class PausaController
         $fecha = $dt->format('Y-m-d');
         $tsUtc = $dt->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s.v');
 
-        // 1) Resolver target por uuid (idempotente)
+        // Resolución por uuid si viene; si no, última pausa abierta del mismo tipo.
         $target = null;
         if (!empty($b['uuid'])) {
             $byUuid = $this->findByUuid((string) $b['uuid']);
@@ -126,7 +125,6 @@ final class PausaController
             }
         }
 
-        // 2) Fallback: última pausa abierta del mismo tipo en la jornada del fecha
         if ($target === null) {
             $jornada = $this->findJornadaAbierta($userId, $fecha);
             $stmt = Db::pdo()->prepare(
@@ -141,7 +139,6 @@ final class PausaController
             }
         }
 
-        // Si ya está cerrada → idempotente
         if ($target['fin'] !== null) {
             Response::ok(['pausa' => $this->mapPausa($target), 'idempotent' => true]);
         }
@@ -165,8 +162,6 @@ final class PausaController
         $updated = $this->findByUuid($target['uuid']);
         Response::ok(['pausa' => $this->mapPausa($updated)]);
     }
-
-    // ---------- helpers ----------
 
     private function findJornadaAbierta(int $userId, string $fecha): array
     {
@@ -224,7 +219,7 @@ final class PausaController
 
     private function mapPausa(array $r): array
     {
-        // duracion_min en vivo si la pausa sigue abierta.
+        // Duración en vivo mientras la pausa siga abierta.
         if ($r['fin'] === null) {
             $duracion = (int) round((time() - strtotime($r['inicio'])) / 60);
         } else {

@@ -18,7 +18,6 @@ final class JornadaController
         $where = ['user_id = ?', 'deleted_at IS NULL'];
         $vals  = [$userId];
         if (!empty($q['mes'])) {
-            // Formato esperado: YYYY-MM
             if (!preg_match('/^\d{4}-\d{2}$/', (string) $q['mes'])) {
                 Response::error('VALIDATION_ERROR', 'Parámetro "mes" debe tener formato YYYY-MM.', 422);
             }
@@ -53,7 +52,7 @@ final class JornadaController
         $mes    = $this->aggregate($userId, $monthStart, $hoy->format('Y-m-d'));
         $anio   = $this->aggregate($userId, $yearStart, $hoy->format('Y-m-d'));
 
-        // Jornadas incompletas SOLO en mes (Art. 12 RD-Ley 8/2019: actionable corto plazo).
+        // Jornadas incompletas solo del mes en curso (corto plazo accionable).
         $stmt = Db::pdo()->prepare(
             'SELECT COUNT(*) FROM ' . Db::table('jornadas') . '
              WHERE user_id = ? AND deleted_at IS NULL
@@ -63,7 +62,6 @@ final class JornadaController
         $stmt->execute([$userId, $monthStart, $hoy->format('Y-m-d')]);
         $incompletas = (int) $stmt->fetchColumn();
 
-        // Horas contrato (aproximación lineal)
         $contrato = $this->loadContratoVigente($userId);
         $horasContrato = $this->calcHorasContrato($contrato, $hoy);
 
@@ -92,7 +90,6 @@ final class JornadaController
             Response::error('NOT_FOUND', 'Jornada no encontrada.', 404);
         }
 
-        // Fichajes asociados
         $stmt = Db::pdo()->prepare(
             'SELECT uuid, tipo, timestamp_evento, latitud, longitud, metodo
              FROM ' . Db::table('fichajes') . '
@@ -105,22 +102,15 @@ final class JornadaController
         Response::ok(array_merge(
             $this->mapJornada($row),
             [
-                'estado_raw' => $row['estado'],   // sin mapear, por si la app necesita CORREGIDA vs VALIDADA
+                // estado sin mapear para distinguir CORREGIDA de VALIDADA.
+                'estado_raw' => $row['estado'],
                 'fichajes'   => $fichajes,
             ]
         ));
     }
 
-    // ---------- helpers ----------
-
-    /**
-     * Mapea estado del schema al vocabulario de la API:
-     *   - CORREGIDA → CORREGIDA (preservado para que la app lo distinga de VALIDADA)
-     *   - VALIDADA o validada_at NOT NULL → VALIDADA
-     *   - CERRADA → CERRADA
-     *   - ABIERTA + fecha < hoy → INCOMPLETA
-     *   - ABIERTA + fecha >= hoy → ABIERTA
-     */
+    // Traduce el estado del schema al vocabulario de la API.
+    // ABIERTA con fecha pasada se considera INCOMPLETA.
     private function mapEstado(array $r): string
     {
         if ($r['estado'] === 'CORREGIDA') {
@@ -132,7 +122,6 @@ final class JornadaController
         if ($r['estado'] === 'CERRADA') {
             return 'CERRADA';
         }
-        // ABIERTA
         return $r['fecha'] < date('Y-m-d') ? 'INCOMPLETA' : 'ABIERTA';
     }
 
@@ -150,9 +139,6 @@ final class JornadaController
         ];
     }
 
-    /**
-     * @return array{minutos_trabajados:int, minutos_extra:int, dias_trabajados:int, jornadas_total:int}
-     */
     private function aggregate(int $userId, string $desde, string $hasta): array
     {
         $stmt = Db::pdo()->prepare(
@@ -188,10 +174,7 @@ final class JornadaController
         return $stmt->fetch() ?: null;
     }
 
-    /**
-     * Aproximación lineal sin descontar vacaciones ni festivos.
-     * @return array{semana: ?float, mes: ?float, anio: ?float}
-     */
+    // Aproximación lineal sin descontar vacaciones ni festivos.
     private function calcHorasContrato(?array $contrato, \DateTimeImmutable $hoy): array
     {
         if ($contrato === null) {

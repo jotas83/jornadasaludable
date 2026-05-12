@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension type="component" method="upgrade">
     <name>com_jornadasaludable</name>
-    <author>Jornada Saludable</author>
+    <author>Jonathan Soriano</author>
     <creationDate>2026-05</creationDate>
-    <copyright>(C) 2026 Jornada Saludable</copyright>
+    <copyright>(C) 2026 Jonathan Soriano</copyright>
     <license>GPL v2 or later</license>
     <version>1.0.0</version>
     <description>COM_JORNADASALUDABLE_XML_DESCRIPTION</description>

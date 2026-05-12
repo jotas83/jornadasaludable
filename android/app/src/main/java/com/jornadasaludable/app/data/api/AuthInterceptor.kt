@@ -6,15 +6,7 @@ import okhttp3.Response
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Adjunta el header `Authorization: Bearer <access_token>` a toda petición
- * a endpoints autenticados. Se salta los endpoints públicos (health, login,
- * refresh) para que NO viaje un token caducado en peticiones que no lo
- * necesitan.
- *
- * Lee el token de DataStore vía `accessTokenBlocking` — el interceptor corre
- * en thread de red (no en main), así que el bloqueo es seguro.
- */
+// Añade Authorization: Bearer en las peticiones autenticadas.
 @Singleton
 class AuthInterceptor @Inject constructor(
     private val tokenStore: TokenStore,

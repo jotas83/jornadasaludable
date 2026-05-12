@@ -2,15 +2,7 @@ package com.jornadasaludable.app.data.api
 
 import com.google.gson.annotations.SerializedName
 
-/**
- * DTOs mínimos para el flow de autenticación. El resto de endpoints usa
- * `Map<String, Any?>` (request) y `JsonObject` (response) por ahora — se
- * irán tipando a medida que se construyan las pantallas.
- */
-
-// =============================================================================
-//  Auth
-// =============================================================================
+// DTOs base para autenticación y el sobre de respuesta común.
 
 data class LoginRequest(
     val nif: String? = null,
@@ -42,17 +34,7 @@ data class UserDto(
     val idioma: String?,
 )
 
-// =============================================================================
-//  Envoltorio de respuesta uniforme
-// =============================================================================
-
-/**
- * Sobre genérico que la API devuelve en éxito:
- *   { "data": { ... } }
- *
- * Y en error:
- *   { "error": { "code": "...", "message": "...", "details": {...} } }
- */
+// Sobre genérico: { data } o { error }.
 data class ApiEnvelope<T>(
     val data: T? = null,
     val error: ApiError? = null,

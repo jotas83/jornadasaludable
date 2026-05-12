@@ -15,7 +15,6 @@ class FichajeRepository @Inject constructor(
     private val api: ApiService,
     private val gson: Gson,
 ) {
-    /** Fichajes de un día concreto (YYYY-MM-DD). Util para "historial de hoy". */
     suspend fun fichajesOfDay(date: String): Result<List<FichajeDto>> =
         safeApiCall(gson) {
             api.fichajesIndex(mapOf(
@@ -25,7 +24,6 @@ class FichajeRepository @Inject constructor(
             ))
         }.map { it.items }
 
-    /** Crea un fichaje (ENTRADA o SALIDA). El UUID se genera client-side para idempotencia. */
     suspend fun crearFichaje(req: FichajeCreateRequest): Result<FichajeCreateResponse> =
         safeApiCall(gson) { api.fichajeCreate(req) }
 }

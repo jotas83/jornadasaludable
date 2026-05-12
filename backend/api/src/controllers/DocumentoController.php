@@ -64,17 +64,14 @@ final class DocumentoController
             $periodoHasta = date('Y-m-t', strtotime($periodoDesde));
         }
 
-        // Carga datos del usuario y empresa actual
         $user    = $this->loadUser($userId);
         $empresa = $this->loadEmpresaActual($userId);
         $jornadas = ($tipo === 'REGISTRO_JORNADA_MENSUAL')
             ? $this->loadJornadasRange($userId, $periodoDesde, $periodoHasta)
             : [];
 
-        // Render PDF
         $pdfBytes = $this->renderPdf($tipo, $user, $empresa, $jornadas, $periodoDesde, $periodoHasta);
 
-        // Persistencia en disco
         $uuid = Uuid::uuid4()->toString();
         $year = (int) date('Y');
         $base = (string) ($GLOBALS['JS_CONFIG']['documentos']['storage_path'] ?? sys_get_temp_dir());
@@ -138,14 +135,12 @@ final class DocumentoController
             Response::error('FILE_NOT_FOUND', 'El fichero ya no existe en el almacenamiento.', 410);
         }
 
-        // Marcar como descargado la primera vez
         if ((int) $doc['descargado'] === 0) {
             Db::pdo()
                 ->prepare('UPDATE ' . Db::table('documentos') . ' SET descargado = 1, descargado_at = NOW() WHERE id = ?')
                 ->execute([(int) $doc['id']]);
         }
 
-        // Stream binario y exit
         $name = preg_replace('/[^A-Za-z0-9._\- ]+/', '_', (string) $doc['nombre_fichero']) ?: 'documento.pdf';
         if (!headers_sent()) {
             http_response_code(200);
@@ -157,8 +152,6 @@ final class DocumentoController
         readfile($abs);
         exit;
     }
-
-    // ---------- helpers ----------
 
     private function loadUser(int $userId): array
     {
@@ -183,7 +176,6 @@ final class DocumentoController
         return $stmt->fetch() ?: null;
     }
 
-    /** @return list<array> */
     private function loadJornadasRange(int $userId, string $desde, string $hasta): array
     {
         $stmt = Db::pdo()->prepare(

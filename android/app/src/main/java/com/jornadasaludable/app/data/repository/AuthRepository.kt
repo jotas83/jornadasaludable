@@ -14,13 +14,7 @@ import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Punto único de entrada al flujo de autenticación. ViewModels llaman aquí,
- * no a la API ni al TokenStore directamente.
- *
- * Contrato: devuelve `Result<UserDto>` para que el caller pueda hacer
- * `.onSuccess { ... }.onFailure { ... }` sin try/catch en el ViewModel.
- */
+// Punto único de entrada al flujo de autenticación.
 @Singleton
 class AuthRepository @Inject constructor(
     private val api: ApiService,
@@ -29,10 +23,6 @@ class AuthRepository @Inject constructor(
     private val gson: Gson,
 ) {
 
-    /**
-     * Detecta si el identificador es email (contiene '@') y lo manda al
-     * backend en el campo apropiado. El backend acepta ambos por separado.
-     */
     suspend fun login(identifier: String, password: String): Result<UserDto> {
         if (identifier.isBlank() || password.isBlank()) {
             return Result.failure(IllegalArgumentException("Email/NIF y contraseña son obligatorios."))
@@ -67,13 +57,12 @@ class AuthRepository @Inject constructor(
     }
 
     suspend fun logout() {
-        // Logout local siempre, aunque la llamada al servidor falle (offline o token expirado).
+        // Logout local aunque la llamada al servidor falle (offline o token caducado).
         runCatching { api.logout() }
         tokenStore.clear()
         userDao.deleteAll()
     }
 
-    /** True si hay un access token persistido (no garantiza que sea válido). */
     val isAuthenticated: Flow<Boolean>
         get() = tokenStore.accessToken.map { !it.isNullOrBlank() }
 

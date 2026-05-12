@@ -1,7 +1,4 @@
 <?php
-/**
- * @package JornadaSaludable\Api
- */
 declare(strict_types=1);
 
 namespace JornadaSaludable\Api;
@@ -13,24 +10,10 @@ use Firebase\JWT\SignatureInvalidException;
 use RuntimeException;
 use Throwable;
 
-/**
- * Middleware JWT. Encapsula firmado/decodificado de tokens y la extracción
- * del Bearer del header Authorization. requireAccessToken() es el guard
- * que llaman los handlers que necesitan usuario autenticado: o devuelve
- * los claims, o termina el request con 401 vía Response::error.
- *
- * Modelo: pareja access (15 min) + refresh (30 días). El refresh se rota
- * en cada uso y se almacena solo como SHA-256 — el JWT en claro nunca toca
- * la BD.
- */
+// Pareja access (15 min) + refresh (30 días). El refresh se rota en cada uso
+// y solo se guarda en BD como SHA-256.
 final class Auth
 {
-    /**
-     * Genera la pareja access+refresh para un usuario autenticado.
-     *
-     * @param  array  $user  Mínimo: id. Opcional: uuid, nif, email.
-     * @return array{access_token: string, refresh_token: string, expires_in: int}
-     */
     public static function issueTokenPair(array $user): array
     {
         $now = time();
@@ -66,13 +49,6 @@ final class Auth
         return JWT::encode($payload, self::secret(), $cfg['algo']);
     }
 
-    /**
-     * Decodifica un JWT y devuelve los claims. Lanza ExpiredException o
-     * SignatureInvalidException si el token no es válido — el caller decide
-     * si las traduce a 401 o las deja burbujear.
-     *
-     * @return array Claims del JWT
-     */
     public static function decode(string $token): array
     {
         $cfg = $GLOBALS['JS_CONFIG']['jwt'];
@@ -80,27 +56,18 @@ final class Auth
         return (array) $decoded;
     }
 
-    /**
-     * Hash determinista del refresh token para almacenarlo en BD sin
-     * guardar el JWT en claro. Permite verificación por igualdad
-     * (hash_equals) y rotación segura.
-     */
     public static function hashRefreshToken(string $token): string
     {
         return hash('sha256', $token);
     }
 
-    /**
-     * Extrae el bearer token del header Authorization. Devuelve null si
-     * falta o el formato no encaja.
-     */
     public static function bearerToken(): ?string
     {
         $header = $_SERVER['HTTP_AUTHORIZATION']
             ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION']
             ?? '';
 
-        // Apache mod_php: a veces solo está accesible vía apache_request_headers().
+        // Fallback para Apache mod_php.
         if ($header === '' && \function_exists('apache_request_headers')) {
             $headers = apache_request_headers();
             $header  = $headers['Authorization'] ?? $headers['authorization'] ?? '';
@@ -112,13 +79,7 @@ final class Auth
         return $m[1];
     }
 
-    /**
-     * Guard para rutas autenticadas. Devuelve los claims si el access token
-     * es válido; termina con 401 vía Response::error en cualquier otro caso
-     * (sin token, expirado, firma inválida, tipo incorrecto).
-     *
-     * @return array Claims (sub, uuid, nif, email, typ, iat, exp, iss, aud)
-     */
+    // Guard para rutas autenticadas. Termina con 401 si el token no es válido.
     public static function requireAccessToken(): array
     {
         $token = self::bearerToken();

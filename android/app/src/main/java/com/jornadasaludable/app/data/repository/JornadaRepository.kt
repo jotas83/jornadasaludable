@@ -13,14 +13,9 @@ class JornadaRepository @Inject constructor(
     private val api: ApiService,
     private val gson: Gson,
 ) {
-    /** Datos agregados semana/mes/año + horas_contrato. */
     suspend fun resumen(): Result<ResumenDto> =
         safeApiCall(gson) { api.jornadasResumen() }
 
-    /**
-     * Listado de jornadas del mes en formato YYYY-MM. Devuelve también
-     * paginación (limit/offset) por si el front quiere más detalle.
-     */
     suspend fun jornadasOfMonth(yearMonth: String): Result<JornadasIndexResponse> =
         safeApiCall(gson) { api.jornadasIndex(mapOf("mes" to yearMonth)) }
 }

@@ -73,7 +73,7 @@ final class AlertaController
         $tipos = $this->loadTiposByCode();
         $generadas = [];
 
-        // 1) JORNADA_EXCEDIDA — minutos_trabajados > 540 en últimos 7 días
+        // JORNADA_EXCEDIDA: > 9 h en los últimos 7 días
         $stmt = Db::pdo()->prepare(
             'SELECT id, uuid, fecha, minutos_trabajados FROM ' . Db::table('jornadas') . '
              WHERE user_id = ? AND deleted_at IS NULL
@@ -89,7 +89,7 @@ final class AlertaController
             if ($a) $generadas[] = $a;
         }
 
-        // 2) DESCANSO_INSUFICIENTE — gap entre fin(N) y inicio(N+1) < 720 min
+        // DESCANSO_INSUFICIENTE: gap < 12 h entre jornadas consecutivas
         $stmt = Db::pdo()->prepare(
             'SELECT id, uuid, fecha, hora_inicio, hora_fin FROM ' . Db::table('jornadas') . '
              WHERE user_id = ? AND deleted_at IS NULL
@@ -112,7 +112,7 @@ final class AlertaController
             }
         }
 
-        // 3) HORAS_EXTRA_LIMITE — SUM(minutos) anual > 4800
+        // HORAS_EXTRA_LIMITE: total anual > 80 h
         $stmt = Db::pdo()->prepare(
             'SELECT COALESCE(SUM(minutos), 0) FROM ' . Db::table('horas_extra') . '
              WHERE user_id = ? AND deleted_at IS NULL AND created_at >= DATE_FORMAT(CURDATE(), "%Y-01-01")'
@@ -127,7 +127,7 @@ final class AlertaController
             if ($a) $generadas[] = $a;
         }
 
-        // 4) SIN_DESCANSO_SEMANAL — 7 días distintos trabajados en últimos 7 días
+        // SIN_DESCANSO_SEMANAL: 7 días distintos trabajados
         $stmt = Db::pdo()->prepare(
             'SELECT COUNT(DISTINCT fecha) FROM ' . Db::table('jornadas') . '
              WHERE user_id = ? AND deleted_at IS NULL
@@ -143,7 +143,7 @@ final class AlertaController
             if ($a) $generadas[] = $a;
         }
 
-        // 5) FICHAJE_INCOMPLETO — jornada ABIERTA con fecha < hoy
+        // FICHAJE_INCOMPLETO: jornada ABIERTA con fecha anterior a hoy
         $stmt = Db::pdo()->prepare(
             'SELECT id, fecha FROM ' . Db::table('jornadas') . '
              WHERE user_id = ? AND deleted_at IS NULL
@@ -153,7 +153,6 @@ final class AlertaController
         $stmt->execute([$userId]);
         foreach ($stmt->fetchAll() as $j) {
             $tipo = $tipos['FICHAJE_INCOMPLETO'] ?? $tipos['PAUSA_OMITIDA'] ?? null;
-            // Si no existe el tipo en el seed, saltamos (defensivo).
             if ($tipo === null) continue;
             $a = $this->createIfNew($userId, $tipos['FICHAJE_INCOMPLETO'] ?? $tipo, (int) $j['id'],
                 $j['fecha'] . ' 23:59:59',
@@ -162,7 +161,7 @@ final class AlertaController
             if ($a) $generadas[] = $a;
         }
 
-        // 6) PAUSA_OMITIDA — jornadas con minutos_trabajados > 360 y SUM(pausas computa_jornada=0) < 15
+        // PAUSA_OMITIDA: jornadas > 6 h sin descanso mínimo de 15 min
         $stmt = Db::pdo()->prepare(
             'SELECT j.id, j.fecha, COALESCE(SUM(p.minutos), 0) AS pausa_total
              FROM ' . Db::table('jornadas') . ' j
@@ -184,7 +183,7 @@ final class AlertaController
             }
         }
 
-        // 7) RIESGO_BURNOUT — calcula score y genera + registra eval si nivel cambia
+        // RIESGO_BURNOUT: calcula score y registra la evaluación si el nivel cambia
         $burnout = $this->evaluateBurnout($userId);
         if ($burnout['nivel'] === 'CRITICO' && isset($tipos['RIESGO_BURNOUT'])) {
             $a = $this->createIfNew($userId, $tipos['RIESGO_BURNOUT'], null,
@@ -214,7 +213,7 @@ final class AlertaController
         );
         $stmt->execute([$uuid, $userId]);
         if ($stmt->rowCount() === 0) {
-            // No existe o ya estaba leída
+            // No existía o ya estaba leída: comprobamos cuál de las dos.
             $check = Db::pdo()->prepare('SELECT id FROM ' . Db::table('alertas') . ' WHERE uuid = ? AND user_id = ?');
             $check->execute([$uuid, $userId]);
             if ($check->fetchColumn() === false) {
@@ -234,9 +233,6 @@ final class AlertaController
         Response::ok($this->mapAlerta($row));
     }
 
-    // ---------- helpers ----------
-
-    /** @return array<string,int> codigo → id */
     private function loadTiposByCode(): array
     {
         $stmt = Db::pdo()->query('SELECT id, codigo FROM ' . Db::table('alertas_tipos'));
@@ -247,10 +243,7 @@ final class AlertaController
         return $out;
     }
 
-    /**
-     * Inserta una alerta solo si no existe ya una equivalente sin leer
-     * (mismo user/tipo/jornada o mismo user/tipo/DATE(fecha_evento)).
-     */
+    // Inserta solo si no existe ya una equivalente sin leer (dedup por jornada o por día).
     private function createIfNew(int $userId, int $tipoId, ?int $jornadaId, string $fechaEvento, string $mensaje, ?string $valor): ?array
     {
         $sql = 'SELECT id FROM ' . Db::table('alertas') . '
@@ -267,7 +260,7 @@ final class AlertaController
         $stmt = Db::pdo()->prepare($sql);
         $stmt->execute($vals);
         if ($stmt->fetchColumn() !== false) {
-            return null; // dedup
+            return null;
         }
 
         $uuid = Uuid::uuid4()->toString();
@@ -288,12 +281,9 @@ final class AlertaController
         return $this->mapAlerta($stmt->fetch());
     }
 
-    /**
-     * @return array{horas_promedio_dia: float, dias_sin_descanso: int, jornadas_excesivas: int, puntuacion: float, nivel: string}
-     */
     private function evaluateBurnout(int $userId): array
     {
-        // Ventana 30 días
+        // Ventana de 30 días.
         $stmt = Db::pdo()->prepare(
             'SELECT fecha, minutos_trabajados FROM ' . Db::table('jornadas') . '
              WHERE user_id = ? AND deleted_at IS NULL
@@ -354,7 +344,7 @@ final class AlertaController
         $stmt->execute([$userId]);
         $prev = $stmt->fetchColumn();
         if ($prev !== false && $prev === $eval['nivel']) {
-            return; // no cambió, no persiste
+            return;
         }
 
         Db::pdo()->prepare(

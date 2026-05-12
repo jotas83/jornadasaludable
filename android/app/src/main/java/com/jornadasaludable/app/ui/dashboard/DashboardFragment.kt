@@ -10,13 +10,7 @@ import com.jornadasaludable.app.R
 import com.jornadasaludable.app.databinding.FragmentDashboardBinding
 import dagger.hilt.android.AndroidEntryPoint
 
-/**
- * Pantalla post-login. Hostea dos pestañas en un ViewPager2:
- *   0 → DashboardTabFragment  (estado de jornada + resumen semanal + alertas)
- *   1 → PerfilTabFragment     (datos del usuario + empresa + logout)
- *
- * No tiene lógica propia — solo cosé TabLayout + ViewPager2.
- */
+// Dos tabs: Dashboard + Perfil.
 @AndroidEntryPoint
 class DashboardFragment : Fragment() {
 
@@ -36,8 +30,6 @@ class DashboardFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.viewPager.adapter = DashboardPagerAdapter(this)
-        // Desactivar swipe horizontal para evitar conflictos con scrolls
-        // verticales dentro de las tabs (no es necesario, lo dejamos activo).
 
         TabLayoutMediator(binding.tabs, binding.viewPager) { tab, position ->
             tab.text = when (position) {
@@ -49,7 +41,7 @@ class DashboardFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        binding.viewPager.adapter = null  // evita leaks del FragmentStateAdapter
+        binding.viewPager.adapter = null
         _binding = null
     }
 }

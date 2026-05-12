@@ -10,16 +10,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import java.io.IOException
 
-/**
- * Worker periódico (15 min con NETWORK_CONNECTED) y on-demand. Delega la
- * lógica de sync a `OfflineFichajeRepository.syncPendingNow()` para que la
- * misma implementación sirva tanto al worker como al botón "Sincronizar
- * ahora" del Fragment.
- *
- *   - Sin pendientes → success() inmediato (no consume datos).
- *   - IOException    → retry() (WorkManager backoff exponencial).
- *   - Otro error     → failure() (no insistas).
- */
+// Worker periódico y on-demand. Delega en OfflineFichajeRepository.syncPendingNow().
 @HiltWorker
 class SyncWorker @AssistedInject constructor(
     @Assisted appContext: Context,

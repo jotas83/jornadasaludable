@@ -57,10 +57,6 @@ class InformesTabViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Descarga el PDF a `cacheDir/pdf_{uuid}.pdf` y emite `pendingOpenFile`
-     * para que el Fragment lance Intent ACTION_VIEW vía FileProvider.
-     */
     fun openDocumento(uuid: String, cacheDir: File) {
         if (_state.value.downloadingUuid != null) return
         viewModelScope.launch {

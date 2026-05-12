@@ -1,16 +1,9 @@
 <?php
-/**
- * @package JornadaSaludable\Api
- */
 declare(strict_types=1);
 
 namespace JornadaSaludable\Api;
 
-/**
- * Helpers de respuesta JSON. Todos los métodos terminan la ejecución con
- * exit; — están declarados : never para que PHP exija que el flujo no
- * continúe tras llamarlos.
- */
+// Helpers de respuesta JSON. Todos los métodos terminan el request.
 final class Response
 {
     public static function ok(mixed $data, int $status = 200): never
@@ -28,11 +21,6 @@ final class Response
         self::send(204, null);
     }
 
-    /**
-     * Error con formato uniforme.
-     *
-     *   { "error": { "code": "AUTH_INVALID_TOKEN", "message": "...", "details": {...} } }
-     */
     public static function error(string $code, string $message, int $status = 400, array $details = []): never
     {
         self::send($status, ['error' => array_filter([

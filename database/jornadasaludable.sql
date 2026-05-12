@@ -1,22 +1,5 @@
--- =============================================================================
---  JornadaSaludable — Esquema de base de datos
---  Motor: MySQL 8.0+ / InnoDB / utf8mb4
---  Backend: Plugin PHP para Joomla 5.x (JWT + TCPDF)
---  Cliente: Android Kotlin (MVVM + Room + WorkManager)
---  Esquema: 16 tablas (catálogos, dominio, sync, auditoría selectiva, licencias y métricas de burnout)
---
---  Convenciones
---  ------------
---  · Prefijo "js_" para todas las tablas. En despliegue Joomla, el plugin
---    aplicará el prefijo del sitio (#__) sustituyéndolo por "js_".
---  · Auditoría selectiva: created_at / updated_at / deleted_at solo en
---    tablas con valor legal probatorio (jornadas, fichajes, horas extra,
---    contratos, usuarios). Los catálogos llevan únicamente created_at.
---  · uuid CHAR(36) en tablas sincronizables — el cliente Room genera el
---    UUID en local y el servidor lo respeta (idempotencia de sync).
---  · sync_status / synced_at en filas que viajan desde el dispositivo.
---  · Soft delete mediante deleted_at IS NULL filtrado en las consultas.
--- =============================================================================
+-- JornadaSaludable — Esquema MySQL (InnoDB / utf8mb4)
+-- 16 tablas: catálogos, dominio, sync, licencias y burnout.
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
@@ -39,9 +22,7 @@ DROP TABLE IF EXISTS `js_centros_trabajo`;
 DROP TABLE IF EXISTS `js_empresas`;
 DROP TABLE IF EXISTS `js_sectores`;
 
--- =============================================================================
---  1. js_sectores — Catálogo de sectores de actividad
--- =============================================================================
+-- Catálogo de sectores de actividad.
 CREATE TABLE `js_sectores` (
   `id`            INT UNSIGNED        NOT NULL AUTO_INCREMENT,
   `codigo`        VARCHAR(20)         NOT NULL COMMENT 'CONSTRUCCION, LIMPIEZA, HOSTELERIA, ...',
@@ -57,9 +38,7 @@ CREATE TABLE `js_sectores` (
   UNIQUE KEY `uk_sectores_codigo` (`codigo`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- =============================================================================
---  2. js_empresas — Empresas / empleadores
--- =============================================================================
+-- Empresas / empleadores.
 CREATE TABLE `js_empresas` (
   `id`            INT UNSIGNED        NOT NULL AUTO_INCREMENT,
   `cif`           VARCHAR(20)         NOT NULL,
@@ -84,9 +63,7 @@ CREATE TABLE `js_empresas` (
   CONSTRAINT `fk_empresas_sector` FOREIGN KEY (`sector_id`) REFERENCES `js_sectores` (`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- =============================================================================
---  3. js_centros_trabajo — Centros / obras / locales
--- =============================================================================
+-- Centros de trabajo (obras, locales, oficinas).
 CREATE TABLE `js_centros_trabajo` (
   `id`            INT UNSIGNED        NOT NULL AUTO_INCREMENT,
   `empresa_id`    INT UNSIGNED        NOT NULL,
@@ -108,9 +85,7 @@ CREATE TABLE `js_centros_trabajo` (
   CONSTRAINT `fk_centros_empresa` FOREIGN KEY (`empresa_id`) REFERENCES `js_empresas` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- =============================================================================
---  4. js_users — Trabajadores (vinculados al usuario Joomla)
--- =============================================================================
+-- Trabajadores (pueden estar vinculados a un usuario Joomla).
 CREATE TABLE `js_users` (
   `id`              INT UNSIGNED       NOT NULL AUTO_INCREMENT,
   `joomla_user_id`  INT UNSIGNED       DEFAULT NULL COMMENT 'FK lógica a #__users.id',
@@ -140,9 +115,7 @@ CREATE TABLE `js_users` (
   KEY `ix_users_email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- =============================================================================
---  5. js_contratos — Relación laboral usuario ↔ empresa
--- =============================================================================
+-- Contratos: relación laboral trabajador-empresa.
 CREATE TABLE `js_contratos` (
   `id`              INT UNSIGNED       NOT NULL AUTO_INCREMENT,
   `uuid`            CHAR(36)           NOT NULL,
@@ -164,10 +137,7 @@ CREATE TABLE `js_contratos` (
   CONSTRAINT `fk_contratos_empresa` FOREIGN KEY (`empresa_id`) REFERENCES `js_empresas` (`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- =============================================================================
---  6. js_jornadas — Jornada diaria (agregado de fichajes)
---  Cumplimiento Art. 12 RD-Ley 8/2019: registro diario de jornada.
--- =============================================================================
+-- Jornada diaria (agregado de fichajes). Art. 12 RD-Ley 8/2019.
 CREATE TABLE `js_jornadas` (
   `id`              BIGINT UNSIGNED    NOT NULL AUTO_INCREMENT,
   `uuid`            CHAR(36)           NOT NULL,
@@ -199,9 +169,7 @@ CREATE TABLE `js_jornadas` (
   CONSTRAINT `fk_jornadas_centro` FOREIGN KEY (`centro_id`) REFERENCES `js_centros_trabajo` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- =============================================================================
---  7. js_fichajes — Eventos individuales de entrada / salida
--- =============================================================================
+-- Fichajes individuales (entradas/salidas).
 CREATE TABLE `js_fichajes` (
   `id`              BIGINT UNSIGNED    NOT NULL AUTO_INCREMENT,
   `uuid`            CHAR(36)           NOT NULL,
@@ -235,10 +203,7 @@ CREATE TABLE `js_fichajes` (
   CONSTRAINT `fk_fichajes_empresa` FOREIGN KEY (`empresa_id`) REFERENCES `js_empresas` (`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- =============================================================================
---  8. js_pausas — Pausas y descansos dentro de la jornada
---  Art. 34.4 ET: 15 min cuando jornada > 6h.
--- =============================================================================
+-- Pausas y descansos dentro de la jornada. Art. 34.4 ET.
 CREATE TABLE `js_pausas` (
   `id`              BIGINT UNSIGNED    NOT NULL AUTO_INCREMENT,
   `uuid`            CHAR(36)           NOT NULL,
@@ -258,10 +223,7 @@ CREATE TABLE `js_pausas` (
   CONSTRAINT `fk_pausas_jornada` FOREIGN KEY (`jornada_id`) REFERENCES `js_jornadas` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- =============================================================================
---  9. js_horas_extra — Horas extraordinarias declaradas
---  Art. 35 ET: máx. 80 h/año, voluntarias salvo pacto, compensables.
--- =============================================================================
+-- Horas extraordinarias. Art. 35 ET (máx. 80 h/año).
 CREATE TABLE `js_horas_extra` (
   `id`              BIGINT UNSIGNED    NOT NULL AUTO_INCREMENT,
   `uuid`            CHAR(36)           NOT NULL,
@@ -286,9 +248,7 @@ CREATE TABLE `js_horas_extra` (
   CONSTRAINT `fk_horasextra_user` FOREIGN KEY (`user_id`) REFERENCES `js_users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- =============================================================================
--- 10. js_alertas_tipos — Catálogo de tipos de alerta (6 tipos)
--- =============================================================================
+-- Catálogo de tipos de alerta.
 CREATE TABLE `js_alertas_tipos` (
   `id`            INT UNSIGNED        NOT NULL AUTO_INCREMENT,
   `codigo`        VARCHAR(40)         NOT NULL,
@@ -304,9 +264,7 @@ CREATE TABLE `js_alertas_tipos` (
   UNIQUE KEY `uk_alertas_tipos_codigo` (`codigo`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- =============================================================================
--- 11. js_alertas — Alertas generadas para el trabajador
--- =============================================================================
+-- Alertas generadas para el trabajador.
 CREATE TABLE `js_alertas` (
   `id`            BIGINT UNSIGNED     NOT NULL AUTO_INCREMENT,
   `uuid`          CHAR(36)            NOT NULL,
@@ -331,9 +289,7 @@ CREATE TABLE `js_alertas` (
   CONSTRAINT `fk_alertas_jornada` FOREIGN KEY (`jornada_id`) REFERENCES `js_jornadas` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- =============================================================================
--- 12. js_derechos_categorias — Categorías del módulo Mis Derechos
--- =============================================================================
+-- Categorías del módulo "Mis Derechos".
 CREATE TABLE `js_derechos_categorias` (
   `id`            INT UNSIGNED        NOT NULL AUTO_INCREMENT,
   `codigo`        VARCHAR(40)         NOT NULL,
@@ -347,9 +303,7 @@ CREATE TABLE `js_derechos_categorias` (
   UNIQUE KEY `uk_derechos_cat_codigo` (`codigo`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- =============================================================================
--- 13. js_derechos — Artículos del módulo Mis Derechos
--- =============================================================================
+-- Artículos del módulo "Mis Derechos".
 CREATE TABLE `js_derechos` (
   `id`            INT UNSIGNED        NOT NULL AUTO_INCREMENT,
   `categoria_id`  INT UNSIGNED        NOT NULL,
@@ -375,9 +329,7 @@ CREATE TABLE `js_derechos` (
   CONSTRAINT `fk_derechos_categoria` FOREIGN KEY (`categoria_id`) REFERENCES `js_derechos_categorias` (`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- =============================================================================
--- 14. js_documentos — Documentos PDF generados (TCPDF)
--- =============================================================================
+-- Documentos PDF generados.
 CREATE TABLE `js_documentos` (
   `id`            BIGINT UNSIGNED     NOT NULL AUTO_INCREMENT,
   `uuid`          CHAR(36)            NOT NULL,
@@ -401,10 +353,7 @@ CREATE TABLE `js_documentos` (
   CONSTRAINT `fk_documentos_user` FOREIGN KEY (`user_id`) REFERENCES `js_users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- =============================================================================
--- 15. js_burnout_evaluaciones — Evaluaciones de riesgo de burnout
---  Calculadas por el motor de WorkManager a partir de las jornadas del usuario.
--- =============================================================================
+-- Evaluaciones de riesgo de burnout (calculadas en cliente).
 CREATE TABLE `js_burnout_evaluaciones` (
   `id`                  INT UNSIGNED   NOT NULL AUTO_INCREMENT,
   `user_id`             INT UNSIGNED   NOT NULL,
@@ -421,9 +370,7 @@ CREATE TABLE `js_burnout_evaluaciones` (
   CONSTRAINT `fk_burnout_user` FOREIGN KEY (`user_id`) REFERENCES `js_users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- =============================================================================
--- 16. js_licencias — Licencias B2B asociadas a la empresa contratante
--- =============================================================================
+-- Licencias B2B por empresa.
 CREATE TABLE `js_licencias` (
   `id`            INT UNSIGNED        NOT NULL AUTO_INCREMENT,
   `empresa_id`    INT UNSIGNED        NOT NULL,
@@ -441,21 +388,15 @@ CREATE TABLE `js_licencias` (
 
 SET FOREIGN_KEY_CHECKS = 1;
 
--- =============================================================================
---  SEED DATA
--- =============================================================================
+-- SEED DATA
 
--- -----------------------------------------------------------------------------
---  Sectores
--- -----------------------------------------------------------------------------
+-- Sectores
 INSERT INTO `js_sectores` (`codigo`, `nombre`, `cnae`, `convenio_ref`, `jornada_max_diaria_min`, `jornada_max_semanal_min`, `descanso_entre_jornadas_min`) VALUES
 ('CONSTRUCCION', 'Construcción', '41', 'Convenio General del Sector de la Construcción', 540, 2400, 720),
 ('LIMPIEZA',     'Limpieza de edificios y locales', '81', 'Convenio Estatal de Limpieza de Edificios y Locales', 540, 2400, 720),
 ('HOSTELERIA',   'Hostelería', '56', 'Acuerdo Laboral Estatal de Hostelería (ALEH)', 540, 2400, 720);
 
--- -----------------------------------------------------------------------------
---  Tipos de alerta — 7 tipos
--- -----------------------------------------------------------------------------
+-- Tipos de alerta
 INSERT INTO `js_alertas_tipos` (`codigo`, `nombre`, `descripcion`, `severidad`, `referencia_legal`, `umbral_valor`, `umbral_unidad`) VALUES
 ('JORNADA_EXCEDIDA',
  'Jornada diaria excedida',
@@ -506,18 +447,14 @@ INSERT INTO `js_alertas_tipos` (`codigo`, `nombre`, `descripcion`, `severidad`, 
  'Ley 31/1995 PRL, Arts. 14-15 (riesgos psicosociales)',
  75, 'puntos');
 
--- -----------------------------------------------------------------------------
---  Categorías del módulo Mis Derechos
--- -----------------------------------------------------------------------------
+-- Categorías "Mis Derechos"
 INSERT INTO `js_derechos_categorias` (`codigo`, `nombre`, `descripcion`, `icono`, `orden`) VALUES
 ('JORNADA',     'Jornada y horario',     'Duración de la jornada, horario, distribución y descansos diarios.', 'ic_clock',     10),
 ('HORAS_EXTRA', 'Horas extraordinarias', 'Realización, compensación y límite anual de horas extras.',           'ic_extra_time',20),
 ('DESCANSOS',   'Descansos y vacaciones','Descanso semanal, festivos y vacaciones anuales retribuidas.',        'ic_beach',     30),
 ('REGISTRO',    'Registro horario',      'Obligación empresarial de registro diario de jornada.',               'ic_punch_card',40);
 
--- -----------------------------------------------------------------------------
---  Mis Derechos — seed (Arts. 34, 35, 37, 38 ET y Art. 12 RD-Ley 8/2019)
--- -----------------------------------------------------------------------------
+-- Mis Derechos: Arts. 34, 35, 37, 38 ET y Art. 12 RD-Ley 8/2019
 
 -- Art. 34 ET — Jornada
 INSERT INTO `js_derechos`
@@ -584,6 +521,4 @@ VALUES
  'registro horario,fichaje,4 años,Inspección de Trabajo,LISOS,sanción,RD-Ley 8/2019,Art. 34.9',
  'es-ES', '1.0', '2019-05-12', 10, 1);
 
--- =============================================================================
---  Fin del esquema
--- =============================================================================
+-- Fin del esquema

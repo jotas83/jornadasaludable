@@ -7,19 +7,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Wrapper sobre ConnectivityManager para una pregunta concreta:
- * "¿hay red disponible AHORA mismo?".
- *
- * Útil cuando WorkManager tarda en detectar el cambio de constraint
- * NETWORK_CONNECTED (típico en emuladores con WiFi alternada): si esta
- * función devuelve true, podemos hacer la petición síncrona desde una
- * coroutine en lugar de esperar al worker.
- *
- * Solo comprueba `NET_CAPABILITY_INTERNET`; no exige `VALIDATED` porque en
- * algunos emuladores (sin DNS válido) Android no marca la capability
- * VALIDATED aunque haya conectividad real.
- */
+// "¿Hay red ahora mismo?" — no exige VALIDATED para tolerar emuladores.
 @Singleton
 class NetworkMonitor @Inject constructor(
     @ApplicationContext private val context: Context,

@@ -13,14 +13,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-/**
- * VM principal de Mis Derechos. Carga categorías, agrega los contenidos por
- * categoría (para conocer counts) y mantiene un estado de búsqueda separado.
- *
- * "Más consultados" (top N) se obtiene tras agregar todos los items: la
- * API no expone un endpoint global de derechos, así que componemos la lista
- * a partir de los contenidos de cada categoría.
- */
+// VM de "Mis Derechos": categorías + contenidos por categoría + búsqueda.
 @HiltViewModel
 class DerechosViewModel @Inject constructor(
     private val derechoRepository: DerechoRepository,
@@ -40,7 +33,6 @@ class DerechosViewModel @Inject constructor(
                 return@launch
             }
 
-            // Cargar contenidos de cada categoría en paralelo
             val porCategoria = cats.associate { cat ->
                 val key = cat.codigo
                 key to async { derechoRepository.contenidosByCategoria(cat.codigo) }
@@ -50,8 +42,7 @@ class DerechosViewModel @Inject constructor(
             }
             val countsMap   = resultados.mapValues { it.value.size }
             val allItems    = resultados.values.flatten()
-            // Sin consultas_count en el listado, usamos `orden` ascendente como
-            // proxy "destacados" del catálogo. El backend ordena así por defecto.
+            // "Más consultados" se aproxima por el `orden` del catálogo (no hay endpoint global).
             val mas = allItems.distinctBy { it.codigo }.take(5)
 
             _state.update {
@@ -66,7 +57,6 @@ class DerechosViewModel @Inject constructor(
         }
     }
 
-    /** Búsqueda con debounce muy ligero — el caller decide cuándo invocar. */
     fun buscar(query: String) {
         val q = query.trim()
         if (q.length < 3) {

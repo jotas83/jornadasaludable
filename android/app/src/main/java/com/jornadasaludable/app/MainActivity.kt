@@ -8,14 +8,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
 
-/**
- * Host único. Aloja:
- *   - NavHostFragment con el nav_graph (start = login).
- *   - BottomNavigationView con dos destinos top-level: Dashboard y Fichaje.
- *
- * El bottom nav se oculta en la pantalla de login (donde el usuario aún no
- * tiene sesión) y se muestra a partir de Dashboard/Fichaje.
- */
+// Host único: NavHost + BottomNavigationView que se oculta en login.
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
@@ -31,7 +24,6 @@ class MainActivity : AppCompatActivity() {
         bottomNav.setupWithNavController(navController)
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            // Sólo visible cuando hay sesión iniciada.
             bottomNav.isVisible = destination.id != R.id.loginFragment
         }
     }

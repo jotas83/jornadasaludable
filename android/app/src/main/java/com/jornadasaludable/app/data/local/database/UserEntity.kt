@@ -4,10 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.jornadasaludable.app.data.api.UserDto
 
-/**
- * Cache local del trabajador autenticado. Solo una fila viva en cualquier
- * momento — al hacer logout se vacía toda la tabla.
- */
+// Cache del trabajador autenticado. Una sola fila viva; el logout vacía la tabla.
 @Entity(tableName = "users")
 data class UserEntity(
     @PrimaryKey val id: Long,

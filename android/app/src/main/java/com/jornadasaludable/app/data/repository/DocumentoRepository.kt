@@ -28,10 +28,7 @@ class DocumentoRepository @Inject constructor(
             )
         }
 
-    /**
-     * Descarga el PDF a `target` (típicamente context.cacheDir/pdf_{uuid}.pdf).
-     * Usa el endpoint @Streaming para no cargar todo el cuerpo en memoria.
-     */
+    // Descarga streaming a `target` para no cargar el PDF entero en memoria.
     suspend fun download(uuid: String, target: File): Result<File> {
         return try {
             val resp = api.documentosDescargar(uuid)

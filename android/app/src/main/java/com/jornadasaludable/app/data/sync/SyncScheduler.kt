@@ -13,19 +13,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Punto único para programar sincronizaciones del SyncWorker.
- *
- *   schedulePeriodicSync()  — desde Application.onCreate(); cada 15 min con
- *                             constraint NETWORK_CONNECTED. Idempotente
- *                             (ExistingPeriodicWorkPolicy.KEEP).
- *
- *   scheduleImmediateSync() — desde el repo cuando se persiste un fichaje
- *                             offline; one-time con la misma constraint, así
- *                             que WorkManager espera a que vuelva la red y
- *                             dispara el SyncWorker en cuanto haya conexión.
- *                             Esto es el "auto-sync on reconnect".
- */
+// Programación de SyncWorker: periódico cada 15 min y one-time on reconnect.
 @Singleton
 class SyncScheduler @Inject constructor(
     @ApplicationContext private val context: Context,

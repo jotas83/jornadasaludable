@@ -5,16 +5,7 @@ import com.google.gson.JsonObject
 import retrofit2.Response
 import java.io.IOException
 
-/**
- * Wrapper común para repositorios: ejecuta un call de Retrofit que devuelve
- * `ApiEnvelope<T>` y traduce el resultado a `Result<T>`. Mapea:
- *
- *   - 2xx con `data` poblado          → Result.success(data)
- *   - 2xx con body vacío              → Result.failure(IOException)
- *   - 4xx/5xx con `error.message`     → Result.failure(message)
- *   - 4xx/5xx sin error parseable     → Result.failure(defaultHttpMessage)
- *   - IOException (sin red, timeout)  → Result.failure(IOException con mensaje legible)
- */
+// Ejecuta un call Retrofit con ApiEnvelope<T> y lo traduce a Result<T>.
 internal suspend fun <T> safeApiCall(
     gson: Gson,
     call: suspend () -> Response<ApiEnvelope<T>>,

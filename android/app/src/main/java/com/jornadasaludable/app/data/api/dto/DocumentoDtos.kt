@@ -10,14 +10,13 @@ data class DocumentosIndexResponse(
 
 data class DocumentoDto(
     val uuid: String,
-    /** REGISTRO_JORNADA_MENSUAL / RESUMEN_HORAS_EXTRA / SOLICITUD_VACACIONES / CERTIFICADO_DERECHOS / OTROS */
     val tipo: String,
     @SerializedName("periodo_desde") val periodoDesde: String?,
     @SerializedName("periodo_hasta") val periodoHasta: String?,
     @SerializedName("nombre_fichero") val nombreFichero: String,
     @SerializedName("tamano_bytes")  val tamanoBytes: Long?,
     @SerializedName("hash_sha256")   val hashSha256: String?,
-    /** Backend devuelve TINYINT(1) sin cast a bool: 0/1 como número. */
+    // El backend manda TINYINT como 0/1.
     val firmado: Int,
     val descargado: Int,
     @SerializedName("descargado_at") val descargadoAt: String?,
@@ -27,10 +26,7 @@ data class DocumentoDto(
     val esDescargado: Boolean get() = descargado != 0
 }
 
-/**
- * POST /documentos/generar — para REGISTRO_JORNADA_MENSUAL el backend
- * espera `mes` en formato YYYY-MM.
- */
+// Para REGISTRO_JORNADA_MENSUAL el backend espera `mes` en formato YYYY-MM.
 data class DocumentoCreateRequest(
     val tipo: String = "REGISTRO_JORNADA_MENSUAL",
     val mes: String? = null,

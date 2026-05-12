@@ -8,7 +8,6 @@ sealed interface PerfilTabUiState {
     data class Error(val message: String) : PerfilTabUiState
     data class Success(
         val perfil:  PerfilDto,
-        /** Null si el usuario no tiene contrato vigente (no es error). */
         val empresa: EmpresaDto?,
     ) : PerfilTabUiState
 }

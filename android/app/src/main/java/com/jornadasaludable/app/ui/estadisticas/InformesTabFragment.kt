@@ -77,19 +77,13 @@ class InformesTabFragment : Fragment() {
             viewModel.consumeMessage()
         }
 
-        // Abrir PDF si hay uno listo. Consume ANTES de openPdf para que un
-        // re-render no dispare el intent dos veces.
+        // Consume antes de openPdf para evitar que un re-render dispare el intent dos veces.
         s.pendingOpenFile?.let { file ->
             viewModel.consumePendingOpenFile()
             openPdf(file)
         }
     }
 
-    /**
-     * Abre el PDF descargado con un Intent ACTION_VIEW vía FileProvider.
-     * El URI lleva FLAG_GRANT_READ_URI_PERMISSION para que el visor externo
-     * pueda leer del cacheDir de nuestra app sin permisos especiales.
-     */
     private fun openPdf(file: File) {
         val ctx = requireContext()
         val uri = FileProvider.getUriForFile(

@@ -34,7 +34,7 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    /** Tras navegar a home, reseteamos para que un back-stack pop al login no se quede en Success. */
+    // Se invoca tras navegar para que un pop al login no reaparezca en Success.
     fun reset() {
         _state.value = LoginUiState.Idle
     }
