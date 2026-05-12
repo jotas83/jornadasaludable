@@ -85,12 +85,12 @@
     <string name="cal_dia_sin_jornada">Sin jornada registrada este día.</string>
 
     <!-- Alertas -->
-    <string name="alertas_burnout_titulo">Riesgo de burnout</string>
-    <string name="alertas_burnout_horas">Horas/día</string>
-    <string name="alertas_burnout_excesivas">Jornadas\nexcesivas</string>
-    <string name="alertas_burnout_dias_sin">Días sin\ndescanso</string>
-    <string name="alertas_burnout_puntuacion">Puntuación</string>
-    <string name="alertas_burnout_sin_datos">Sin datos suficientes</string>
+    <string name="alertas_sobrecarga_titulo">Riesgo de sobrecarga laboral</string>
+    <string name="alertas_sobrecarga_horas">Horas/día</string>
+    <string name="alertas_sobrecarga_excesivas">Jornadas\nexcesivas</string>
+    <string name="alertas_sobrecarga_dias_sin">Días sin\ndescanso</string>
+    <string name="alertas_sobrecarga_puntuacion">Puntuación</string>
+    <string name="alertas_sobrecarga_sin_datos">Sin datos suficientes</string>
     <string name="alertas_tab_hoy">Hoy</string>
     <string name="alertas_tab_semana">Semana</string>
     <string name="alertas_tab_mes">Mes</string>

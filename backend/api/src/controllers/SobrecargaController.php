@@ -6,7 +6,7 @@ namespace JornadaSaludable\Api\Controllers;
 use JornadaSaludable\Api\Db;
 use JornadaSaludable\Api\Response;
 
-final class BurnoutController
+final class SobrecargaController
 {
     public function index(array $ctx): void
     {
@@ -18,7 +18,7 @@ final class BurnoutController
         $stmt = Db::pdo()->prepare(
             'SELECT fecha_evaluacion, horas_promedio_dia, dias_sin_descanso,
                     jornadas_excesivas, puntuacion, nivel
-             FROM ' . Db::table('burnout_evaluaciones') . '
+             FROM ' . Db::table('sobrecarga_evaluaciones') . '
              WHERE user_id = ?
              ORDER BY fecha_evaluacion DESC
              LIMIT ' . $limit . ' OFFSET ' . $offset

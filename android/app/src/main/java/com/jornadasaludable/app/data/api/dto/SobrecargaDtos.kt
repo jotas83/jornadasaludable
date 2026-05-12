@@ -2,14 +2,14 @@ package com.jornadasaludable.app.data.api.dto
 
 import com.google.gson.annotations.SerializedName
 
-data class BurnoutResponse(
-    val items: List<BurnoutEvaluacionDto>,
-    val actual: BurnoutEvaluacionDto?,
+data class SobrecargaResponse(
+    val items: List<SobrecargaEvaluacionDto>,
+    val actual: SobrecargaEvaluacionDto?,
     val limit: Int,
     val offset: Int,
 )
 
-data class BurnoutEvaluacionDto(
+data class SobrecargaEvaluacionDto(
     @SerializedName("fecha_evaluacion")    val fechaEvaluacion: String?,
     @SerializedName("horas_promedio_dia")  val horasPromedioDia: Double?,
     @SerializedName("dias_sin_descanso")   val diasSinDescanso: Int?,

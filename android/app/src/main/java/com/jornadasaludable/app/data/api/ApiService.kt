@@ -4,7 +4,7 @@ import com.google.gson.JsonObject
 import com.jornadasaludable.app.data.api.dto.AlertaDto
 import com.jornadasaludable.app.data.api.dto.AlertasGenerarResponse
 import com.jornadasaludable.app.data.api.dto.AlertasIndexResponse
-import com.jornadasaludable.app.data.api.dto.BurnoutResponse
+import com.jornadasaludable.app.data.api.dto.SobrecargaResponse
 import com.jornadasaludable.app.data.api.dto.CategoriasResponse
 import com.jornadasaludable.app.data.api.dto.DerechoBuscarResponse
 import com.jornadasaludable.app.data.api.dto.DerechoDto
@@ -127,9 +127,9 @@ interface ApiService {
     @GET("documentos/{uuid}/descargar")
     suspend fun documentosDescargar(@Path("uuid") uuid: String): Response<ResponseBody>
 
-    // Burnout
-    @GET("burnout")
-    suspend fun burnoutIndex(@QueryMap params: Map<String, String> = emptyMap()): Response<ApiEnvelope<BurnoutResponse>>
+    // Sobrecarga laboral
+    @GET("sobrecarga")
+    suspend fun sobrecargaIndex(@QueryMap params: Map<String, String> = emptyMap()): Response<ApiEnvelope<SobrecargaResponse>>
 
     // Usuario
     @GET("usuarios/perfil")

@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <!-- Card de burnout (parte superior fija) -->
+    <!-- Card de sobrecarga laboral (parte superior fija) -->
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -19,7 +19,7 @@
             android:layout_height="wrap_content">
 
             <ProgressBar
-                android:id="@+id/progressBurnout"
+                android:id="@+id/progressSobrecarga"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -28,7 +28,7 @@
                 tools:visibility="gone" />
 
             <LinearLayout
-                android:id="@+id/errorBurnout"
+                android:id="@+id/errorSobrecarga"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
@@ -38,13 +38,13 @@
                 tools:visibility="gone">
 
                 <TextView
-                    android:id="@+id/tvBurnoutError"
+                    android:id="@+id/tvSobrecargaError"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="?attr/colorError" />
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnRetryBurnout"
+                    android:id="@+id/btnRetrySobrecarga"
                     style="@style/Widget.Material3.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -52,7 +52,7 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/contentBurnout"
+                android:id="@+id/contentSobrecarga"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
@@ -63,12 +63,12 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/alertas_burnout_titulo"
+                    android:text="@string/alertas_sobrecarga_titulo"
                     android:textAppearance="?attr/textAppearanceLabelMedium"
                     android:textColor="?attr/colorOnSurfaceVariant" />
 
                 <TextView
-                    android:id="@+id/tvBurnoutNivel"
+                    android:id="@+id/tvSobrecargaNivel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
@@ -76,7 +76,7 @@
                     tools:text="MODERADO" />
 
                 <com.google.android.material.progressindicator.LinearProgressIndicator
-                    android:id="@+id/progressBurnoutScore"
+                    android:id="@+id/progressSobrecargaScore"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
@@ -99,7 +99,7 @@
                         android:gravity="center"
                         android:orientation="vertical">
                         <TextView
-                            android:id="@+id/tvBurnoutHoras"
+                            android:id="@+id/tvSobrecargaHoras"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textAppearance="?attr/textAppearanceTitleMedium"
@@ -107,7 +107,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/alertas_burnout_horas"
+                            android:text="@string/alertas_sobrecarga_horas"
                             android:textAppearance="?attr/textAppearanceLabelSmall"
                             android:textColor="?attr/colorOnSurfaceVariant" />
                     </LinearLayout>
@@ -119,7 +119,7 @@
                         android:gravity="center"
                         android:orientation="vertical">
                         <TextView
-                            android:id="@+id/tvBurnoutExcesivas"
+                            android:id="@+id/tvSobrecargaExcesivas"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textAppearance="?attr/textAppearanceTitleMedium"
@@ -127,7 +127,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/alertas_burnout_excesivas"
+                            android:text="@string/alertas_sobrecarga_excesivas"
                             android:textAppearance="?attr/textAppearanceLabelSmall"
                             android:textColor="?attr/colorOnSurfaceVariant"
                             android:gravity="center" />
@@ -140,7 +140,7 @@
                         android:gravity="center"
                         android:orientation="vertical">
                         <TextView
-                            android:id="@+id/tvBurnoutDiasSin"
+                            android:id="@+id/tvSobrecargaDiasSin"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textAppearance="?attr/textAppearanceTitleMedium"
@@ -148,7 +148,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/alertas_burnout_dias_sin"
+                            android:text="@string/alertas_sobrecarga_dias_sin"
                             android:textAppearance="?attr/textAppearanceLabelSmall"
                             android:textColor="?attr/colorOnSurfaceVariant"
                             android:gravity="center" />
@@ -161,7 +161,7 @@
                         android:gravity="center"
                         android:orientation="vertical">
                         <TextView
-                            android:id="@+id/tvBurnoutPuntuacion"
+                            android:id="@+id/tvSobrecargaPuntuacion"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textAppearance="?attr/textAppearanceTitleMedium"
@@ -169,7 +169,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/alertas_burnout_puntuacion"
+                            android:text="@string/alertas_sobrecarga_puntuacion"
                             android:textAppearance="?attr/textAppearanceLabelSmall"
                             android:textColor="?attr/colorOnSurfaceVariant" />
                     </LinearLayout>

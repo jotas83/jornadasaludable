@@ -183,21 +183,21 @@ final class AlertaController
             }
         }
 
-        // RIESGO_BURNOUT: calcula score y registra la evaluación si el nivel cambia
-        $burnout = $this->evaluateBurnout($userId);
-        if ($burnout['nivel'] === 'CRITICO' && isset($tipos['RIESGO_BURNOUT'])) {
-            $a = $this->createIfNew($userId, $tipos['RIESGO_BURNOUT'], null,
+        // RIESGO_SOBRECARGA_LABORAL: calcula score y registra la evaluación si el nivel cambia
+        $sobrecarga = $this->evaluateSobrecarga($userId);
+        if ($sobrecarga['nivel'] === 'CRITICO' && isset($tipos['RIESGO_SOBRECARGA_LABORAL'])) {
+            $a = $this->createIfNew($userId, $tipos['RIESGO_SOBRECARGA_LABORAL'], null,
                 gmdate('Y-m-d H:i:s'),
-                sprintf('Riesgo de burnout %s (puntuación %.1f/100).', $burnout['nivel'], $burnout['puntuacion']),
-                (string) $burnout['puntuacion']);
+                sprintf('Riesgo de sobrecarga laboral %s (puntuación %.1f/100).', $sobrecarga['nivel'], $sobrecarga['puntuacion']),
+                (string) $sobrecarga['puntuacion']);
             if ($a) $generadas[] = $a;
         }
-        $this->persistBurnoutIfChanged($userId, $burnout);
+        $this->persistSobrecargaIfChanged($userId, $sobrecarga);
 
         Response::ok([
-            'generadas' => count($generadas),
-            'alertas'   => $generadas,
-            'burnout'   => $burnout,
+            'generadas'  => count($generadas),
+            'alertas'    => $generadas,
+            'sobrecarga' => $sobrecarga,
         ]);
     }
 
@@ -281,7 +281,7 @@ final class AlertaController
         return $this->mapAlerta($stmt->fetch());
     }
 
-    private function evaluateBurnout(int $userId): array
+    private function evaluateSobrecarga(int $userId): array
     {
         // Ventana de 30 días.
         $stmt = Db::pdo()->prepare(
@@ -318,7 +318,10 @@ final class AlertaController
         }
 
         $horasProm = $diasTrab > 0 ? ($totalMin / 60.0) / $diasTrab : 0.0;
-        $score = ($horasProm / 9 * 40) + ($rachaMax / 30 * 35) + ($excesivas / 20 * 25);
+        $exceso = max(0.0, $horasProm - 8.0);
+        $score = min(40.0, $exceso / 4.0 * 40.0)
+               + min(35.0, $rachaMax / 30.0 * 35.0)
+               + min(25.0, $excesivas / 20.0 * 25.0);
         $score = max(0.0, min(100.0, $score));
 
         return [
@@ -335,10 +338,10 @@ final class AlertaController
         ];
     }
 
-    private function persistBurnoutIfChanged(int $userId, array $eval): void
+    private function persistSobrecargaIfChanged(int $userId, array $eval): void
     {
         $stmt = Db::pdo()->prepare(
-            'SELECT nivel FROM ' . Db::table('burnout_evaluaciones') . '
+            'SELECT nivel FROM ' . Db::table('sobrecarga_evaluaciones') . '
              WHERE user_id = ? ORDER BY fecha_evaluacion DESC LIMIT 1'
         );
         $stmt->execute([$userId]);
@@ -348,7 +351,7 @@ final class AlertaController
         }
 
         Db::pdo()->prepare(
-            'INSERT INTO ' . Db::table('burnout_evaluaciones') . '
+            'INSERT INTO ' . Db::table('sobrecarga_evaluaciones') . '
              (user_id, fecha_evaluacion, horas_promedio_dia, dias_sin_descanso, jornadas_excesivas, puntuacion, nivel)
              VALUES (?, NOW(), ?, ?, ?, ?, ?)'
         )->execute([

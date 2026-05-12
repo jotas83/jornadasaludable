@@ -1,4 +1,4 @@
--- Seed Capítulo 5 — validación de alertas y burnout.
+-- Seed Capítulo 5 — validación de alertas y sobrecarga laboral.
 -- Trabajadores: Pedro (11111111A), Laura (22222222B), Miguel (33333333C).
 -- Password "test1234". Idempotente: el DELETE inicial cascadea por FK.
 
@@ -18,7 +18,7 @@ SET @t_jornada  := (SELECT id FROM js5_js_alertas_tipos WHERE codigo = 'JORNADA_
 SET @t_pausa    := (SELECT id FROM js5_js_alertas_tipos WHERE codigo = 'PAUSA_OMITIDA');
 SET @t_semanal  := (SELECT id FROM js5_js_alertas_tipos WHERE codigo = 'SIN_DESCANSO_SEMANAL');
 SET @t_extras   := (SELECT id FROM js5_js_alertas_tipos WHERE codigo = 'HORAS_EXTRA_LIMITE');
-SET @t_burnout  := (SELECT id FROM js5_js_alertas_tipos WHERE codigo = 'RIESGO_BURNOUT');
+SET @t_sobrecarga := (SELECT id FROM js5_js_alertas_tipos WHERE codigo = 'RIESGO_SOBRECARGA_LABORAL');
 
 -- Trabajadores
 INSERT INTO js5_js_users
@@ -209,23 +209,23 @@ FROM js5_js_jornadas j
 WHERE j.user_id = @miguel_id
   AND j.fecha = DATE_SUB(@today, INTERVAL 0 DAY);
 
--- Miguel: RIESGO_BURNOUT
+-- Miguel: RIESGO_SOBRECARGA_LABORAL
 INSERT INTO js5_js_alertas
   (uuid, user_id, tipo_id, jornada_id, fecha_evento, mensaje,
    valor_detectado, leida, notificada_push, created_at)
 VALUES
-  (UUID(), @miguel_id, @t_burnout, NULL, NOW(),
-   'Evaluación periódica arroja nivel ALTO de riesgo de burnout (Ley 31/1995 PRL).',
+  (UUID(), @miguel_id, @t_sobrecarga, NULL, NOW(),
+   'Evaluación periódica arroja nivel ALTO de riesgo de sobrecarga laboral (Ley 31/1995 PRL).',
    '78 puntos', 0, 1, NOW());
 
--- Evaluaciones de burnout
-INSERT INTO js5_js_burnout_evaluaciones
+-- Evaluaciones de sobrecarga laboral
+INSERT INTO js5_js_sobrecarga_evaluaciones
   (user_id, fecha_evaluacion, horas_promedio_dia, dias_sin_descanso,
    jornadas_excesivas, puntuacion, nivel, created_at)
 VALUES
-  (@laura_id,  NOW(),  8.00, 30,  0, 55.00, 'MODERADO', NOW()),
-  (@miguel_id, NOW(), 11.00,  0, 26, 78.00, 'ALTO',     NOW()),
-  (@pedro_id,  NOW(), 10.50,  0, 22, 60.00, 'MODERADO', NOW());
+  (@laura_id,  NOW(),  8.00, 30,  0, 35.00, 'MODERADO', NOW()),
+  (@miguel_id, NOW(), 11.00,  6, 26, 62.00, 'ALTO',     NOW()),
+  (@pedro_id,  NOW(), 10.50,  3, 22, 53.50, 'ALTO',     NOW());
 
 -- Documentos: un PDF mensual por trabajador
 INSERT INTO js5_js_documentos
@@ -309,21 +309,21 @@ WHERE u.nif IN ('11111111A', '22222222B', '33333333C')
 GROUP BY u.id, u.nif, u.apellidos, u.nombre, t.id, t.codigo, t.severidad
 ORDER BY u.apellidos, t.codigo;
 
--- Burnout y documentos generados
+-- Sobrecarga laboral y documentos generados
 SELECT
   u.nif,
   CONCAT(u.apellidos, ', ', u.nombre) AS trabajador,
-  b.nivel                             AS burnout_nivel,
-  b.puntuacion                        AS burnout_puntos,
+  b.nivel                             AS sobrecarga_nivel,
+  b.puntuacion                        AS sobrecarga_puntos,
   COUNT(d.id)                         AS num_pdfs
 FROM js5_js_users u
-LEFT JOIN js5_js_burnout_evaluaciones b ON b.user_id = u.id
+LEFT JOIN js5_js_sobrecarga_evaluaciones b ON b.user_id = u.id
 LEFT JOIN js5_js_documentos           d ON d.user_id = u.id AND d.deleted_at IS NULL
 WHERE u.nif IN ('11111111A', '22222222B', '33333333C')
 GROUP BY u.id, u.nif, u.apellidos, u.nombre, b.id, b.nivel, b.puntuacion
 ORDER BY u.apellidos;
 
 -- Resultados esperados:
---   Pedro   22 jornadas, 22 excedidas, 22 sin pausa, 33 h extra. MODERADO.
---   Laura   30 jornadas, racha de 30 días, 4 alertas semanales. MODERADO.
---   Miguel  26 jornadas, 78 h extra, RIESGO_BURNOUT. ALTO.
+--   Pedro   22 jornadas, 22 excedidas, 22 sin pausa, 33 h extra. Sobrecarga 53.5 → ALTO.
+--   Laura   30 jornadas, racha de 30 días, 4 alertas semanales. Sobrecarga 35.0 → MODERADO.
+--   Miguel  26 jornadas, 78 h extra, RIESGO_SOBRECARGA_LABORAL. Sobrecarga 62.0 → ALTO.

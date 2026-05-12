@@ -5,7 +5,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 SET time_zone = '+00:00';
 
 DROP TABLE IF EXISTS `js5_js_licencias`;
-DROP TABLE IF EXISTS `js5_js_burnout_evaluaciones`;
+DROP TABLE IF EXISTS `js5_js_sobrecarga_evaluaciones`;
 DROP TABLE IF EXISTS `js5_js_documentos`;
 DROP TABLE IF EXISTS `js5_js_derechos`;
 DROP TABLE IF EXISTS `js5_js_derechos_categorias`;
@@ -352,8 +352,8 @@ CREATE TABLE `js5_js_documentos` (
   CONSTRAINT `fk_documentos_user` FOREIGN KEY (`user_id`) REFERENCES `js5_js_users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Evaluaciones de riesgo de burnout (calculadas en cliente).
-CREATE TABLE `js5_js_burnout_evaluaciones` (
+-- Evaluaciones de riesgo de sobrecarga laboral (calculadas en cliente).
+CREATE TABLE `js5_js_sobrecarga_evaluaciones` (
   `id`                  INT UNSIGNED   NOT NULL AUTO_INCREMENT,
   `user_id`             INT UNSIGNED   NOT NULL,
   `fecha_evaluacion`    DATETIME       NOT NULL,
@@ -364,9 +364,9 @@ CREATE TABLE `js5_js_burnout_evaluaciones` (
   `nivel`               ENUM('BAJO','MODERADO','ALTO','CRITICO') DEFAULT NULL,
   `created_at`          TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `ix_burnout_user_fecha` (`user_id`, `fecha_evaluacion`),
-  KEY `ix_burnout_nivel` (`nivel`),
-  CONSTRAINT `fk_burnout_user` FOREIGN KEY (`user_id`) REFERENCES `js5_js_users` (`id`) ON DELETE CASCADE
+  KEY `ix_sobrecarga_user_fecha` (`user_id`, `fecha_evaluacion`),
+  KEY `ix_sobrecarga_nivel` (`nivel`),
+  CONSTRAINT `fk_sobrecarga_user` FOREIGN KEY (`user_id`) REFERENCES `js5_js_users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Licencias B2B por empresa.
@@ -439,8 +439,8 @@ INSERT INTO `js5_js_alertas_tipos` (`codigo`, `nombre`, `descripcion`, `severida
  'Art. 12 RD-Ley 8/2019',
  1, 'fichaje'),
 
-('RIESGO_BURNOUT',
- 'Riesgo de burnout detectado',
+('RIESGO_SOBRECARGA_LABORAL',
+ 'Riesgo de sobrecarga laboral',
  'La evaluación periódica de carga laboral arroja un nivel ALTO o CRÍTICO. Conviene revisar jornada, descansos y solicitar evaluación de riesgos psicosociales.',
  'GRAVE',
  'Ley 31/1995 PRL, Arts. 14-15 (riesgos psicosociales)',

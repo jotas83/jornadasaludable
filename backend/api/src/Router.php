@@ -54,8 +54,8 @@ final class Router
         ['POST',  'documentos/generar',                        'DocumentoController',      'generar',         false],
         ['GET',   'documentos/{uuid}/descargar',               'DocumentoController',      'descargar',       false],
 
-        // Burnout
-        ['GET',   'burnout',                                   'BurnoutController',        'index',           false],
+        // Sobrecarga laboral
+        ['GET',   'sobrecarga',                                'SobrecargaController',     'index',           false],
 
         // Usuario
         ['GET',   'usuarios/perfil',                           'UsuarioController',        'perfil',          false],
