@@ -15,6 +15,7 @@
         <submenu>
             <menu link="option=com_jornadasaludable&amp;view=empresas" view="empresas" img="icon-briefcase" alt="JornadaSaludable/Empresas">COM_JORNADASALUDABLE_SUBMENU_EMPRESAS</menu>
             <menu link="option=com_jornadasaludable&amp;view=trabajadores" view="trabajadores" img="icon-users" alt="JornadaSaludable/Trabajadores">COM_JORNADASALUDABLE_SUBMENU_TRABAJADORES</menu>
+            <menu link="option=com_jornadasaludable&amp;view=calendario" view="calendario" img="icon-calendar" alt="JornadaSaludable/Calendario">COM_JORNADASALUDABLE_SUBMENU_CALENDARIO</menu>
             <menu link="option=com_jornadasaludable&amp;view=centros" view="centros" img="icon-location" alt="JornadaSaludable/Centros">COM_JORNADASALUDABLE_SUBMENU_CENTROS</menu>
             <menu link="option=com_jornadasaludable&amp;view=alertas" view="alertas" img="icon-warning" alt="JornadaSaludable/Alertas">COM_JORNADASALUDABLE_SUBMENU_ALERTAS</menu>
             <menu link="option=com_jornadasaludable&amp;view=documentos" view="documentos" img="icon-file" alt="JornadaSaludable/Documentos">COM_JORNADASALUDABLE_SUBMENU_DOCUMENTOS</menu>

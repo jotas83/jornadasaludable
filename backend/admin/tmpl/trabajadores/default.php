@@ -34,6 +34,7 @@ $listDirn  = $this->state->get('list.direction', 'ASC');
                         <th scope="col"><?php echo Text::_('COM_JORNADASALUDABLE_TRABAJADOR_FIELD_EMPRESA'); ?></th>
                         <th scope="col" style="width:8%"><?php echo Text::_('COM_JORNADASALUDABLE_TRABAJADOR_FIELD_IDIOMA'); ?></th>
                         <th scope="col" style="width:8%"><?php echo Text::_('COM_JORNADASALUDABLE_TRABAJADOR_FIELD_ACTIVO'); ?></th>
+                        <th scope="col" style="width:12%"><?php echo Text::_('COM_JORNADASALUDABLE_TRABAJADOR_ACCIONES'); ?></th>
                         <th scope="col" style="width:5%">ID</th>
                     </tr>
                     </thead>
@@ -56,6 +57,13 @@ $listDirn  = $this->state->get('list.direction', 'ASC');
                                 <?php else : ?>
                                     <span class="badge bg-secondary"><?php echo Text::_('COM_JORNADASALUDABLE_ESTADO_INACTIVO'); ?></span>
                                 <?php endif; ?>
+                            </td>
+                            <td>
+                                <a class="btn btn-sm btn-outline-primary"
+                                   href="<?php echo Route::_('index.php?option=com_jornadasaludable&view=calendario&user_id=' . (int) $row->id); ?>">
+                                    <span class="icon-calendar" aria-hidden="true"></span>
+                                    <?php echo Text::_('COM_JORNADASALUDABLE_TRABAJADOR_VER_CALENDARIO'); ?>
+                                </a>
                             </td>
                             <td><?php echo (int) $row->id; ?></td>
                         </tr>
