@@ -46,8 +46,8 @@ JornadaSaludable es un sistema diseñado para empoderar a los trabajadores en el
 
 **Backend:**
 - Joomla 5.x
-- PHP 8.1
-- MySQL 8.0
+- PHP 8.3
+- MySQL 9.1
 - API REST
 
 **Características:**
