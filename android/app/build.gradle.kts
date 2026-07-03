@@ -19,10 +19,22 @@ android {
         versionName   = "0.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
 
-        // URL base de la API REST. En el emulador Android, 10.0.2.2 mapea a
-        // localhost del host. Cambiar a la IP/dominio público en producción.
-        buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2/jornadasaludable/api/v1/\"")
+    // Flavors por entorno de red. Cada uno fija su API_BASE_URL para no tener
+    // que editarla a mano al cambiar entre emulador y móvil físico.
+    //   - emulador:    10.0.2.2 mapea a localhost del host (solo emulador).
+    //   - dispositivo: IP del host en la LAN (móvil físico en la misma red).
+    flavorDimensions += "entorno"
+    productFlavors {
+        create("emulador") {
+            dimension = "entorno"
+            buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2/jornadasaludable/api/v1/\"")
+        }
+        create("dispositivo") {
+            dimension = "entorno"
+            buildConfigField("String", "API_BASE_URL", "\"http://192.168.1.140/jornadasaludable/api/v1/\"")
+        }
     }
 
     buildTypes {
@@ -34,7 +46,7 @@ android {
             )
         }
         debug {
-            // Suficiente API_BASE_URL del defaultConfig; aquí se podría override.
+            // API_BASE_URL la fija cada product flavor (emulador / dispositivo).
         }
     }
 

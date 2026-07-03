@@ -8,6 +8,7 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Build
 import android.os.Looper
+import android.util.Log
 import androidx.core.content.ContextCompat
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -69,6 +70,7 @@ class LocationProvider @Inject constructor(
             suspendCancellableCoroutine<Location?> { cont ->
                 val listener = object : LocationListener {
                     override fun onLocationChanged(location: Location) {
+                        Log.d("GPS_METRIC", "${location.latitude},${location.longitude},${location.accuracy},${System.currentTimeMillis()}")
                         try { lm.removeUpdates(this) } catch (_: SecurityException) {}
                         if (cont.isActive) cont.resume(location)
                     }
