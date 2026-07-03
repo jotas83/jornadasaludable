@@ -1,6 +1,6 @@
 # JornadaSaludable
 
-App de control horario y prevención de riesgos laborales
+Aplicación móvil para el control de jornada y la protección del bienestar laboral en sectores vulnerables
 
 [![Licencia](https://img.shields.io/badge/licencia-Apache%202.0-blue.svg)](LICENSE)
 [![Estado](https://img.shields.io/badge/estado-en%20desarrollo-yellow.svg)]()
