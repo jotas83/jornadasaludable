@@ -23,7 +23,7 @@ JornadaSaludable es un sistema diseñado para empoderar a los trabajadores en el
 
 ### Objetivos principales
 
-1. **Control horario transparente:** Fichaje con geolocalización y acceso directo del trabajador a sus datos (cumplimiento RD 8/2019)
+1. **Control horario transparente:** Fichaje con geolocalización y acceso directo del trabajador a sus datos (cumplimiento RDL 8/2019)
 2. **Prevención de riesgos laborales:** Sistema de alertas automáticas que detecta situaciones de riesgo (exceso de horas según ET, ausencia de descansos legales, indicadores de fatiga laboral)
 3. **Educación sobre derechos laborales:** Módulo informativo con artículos del Estatuto de los Trabajadores explicados en lenguaje accesible
 
